@@ -6,34 +6,42 @@ class MusicViewModel: ObservableObject {
     @Published var artistName: String = ""
     @Published var videoId: String?
     @Published var selectedYear: Int = 0
+    @Published var selectedDayMonth: String = ""
     
-    // Debug info
-    @Published var lastFMUrl: String = ""
-    @Published var youtubeUrl: String = ""
+    @Published var tracksFound: [ITunesTrack] = []
+    @Published var appleMusicUrl: String = ""
     
     private let musicService = MusicService()
     private let youtubeService = YouTubeService()
     
     func loadDailyNostalgia() {
+        let calendar = Calendar.current
+        let day = calendar.component(.day, from: Date())
+        let month = calendar.component(.month, from: Date())
         let year = Int.random(in: 2000...2016)
+        
         self.selectedYear = year
+        self.selectedDayMonth = "\(day)/\(month)"
         self.videoId = nil
         
-        musicService.fetchTopTrack(year: year) { name, artist, url in
+        musicService.fetchTopTracks(year: year) { tracks, url in
             DispatchQueue.main.async {
-                self.lastFMUrl = url ?? ""
-                if let name = name, let artist = artist {
+                self.tracksFound = tracks
+                self.appleMusicUrl = url
+                
+                if let randomTrack = tracks.randomElement(),
+                   let name = randomTrack.trackName,
+                   let artist = randomTrack.artistName {
                     self.trackName = name
                     self.artistName = artist
                     
-                    self.youtubeService.fetchVideoId(q: "\(name) \(artist) official music video") { vId, ytUrl in
+                    self.youtubeService.fetchVideoId(q: "\(name) \(artist) official music video") { vId, _ in
                         DispatchQueue.main.async {
                             self.videoId = vId
-                            self.youtubeUrl = ytUrl ?? ""
                         }
                     }
                 } else {
-                    self.trackName = "Erro ao carregar música"
+                    self.trackName = "Nenhum hit encontrado em \(year)"
                 }
             }
         }

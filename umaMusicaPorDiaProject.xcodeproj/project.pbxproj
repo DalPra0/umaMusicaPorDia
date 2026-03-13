@@ -6,14 +6,65 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		157E31212F64980D0041B4EE /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 157E31202F64980D0041B4EE /* WidgetKit.framework */; };
+		157E31232F64980D0041B4EE /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 157E31222F64980D0041B4EE /* SwiftUI.framework */; };
+		157E31342F64980E0041B4EE /* musicaDoDiaWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 157E311E2F64980D0041B4EE /* musicaDoDiaWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		157E31322F64980E0041B4EE /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 154A09132F6349BB004F831C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 157E311D2F64980D0041B4EE;
+			remoteInfo = musicaDoDiaWidgetExtension;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		157E31152F6495EE0041B4EE /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				157E31342F64980E0041B4EE /* musicaDoDiaWidgetExtension.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		154A091B2F6349BB004F831C /* umaMusicaPorDiaProject.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = umaMusicaPorDiaProject.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		157E311E2F64980D0041B4EE /* musicaDoDiaWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = musicaDoDiaWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		157E31202F64980D0041B4EE /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		157E31222F64980D0041B4EE /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
+
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		157E31352F64980E0041B4EE /* Exceptions for "musicaDoDiaWidget" folder in "musicaDoDiaWidgetExtension" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 157E311D2F64980D0041B4EE /* musicaDoDiaWidgetExtension */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		154A091D2F6349BB004F831C /* umaMusicaPorDiaProject */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = umaMusicaPorDiaProject;
+			sourceTree = "<group>";
+		};
+		157E31242F64980D0041B4EE /* musicaDoDiaWidget */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				157E31352F64980E0041B4EE /* Exceptions for "musicaDoDiaWidget" folder in "musicaDoDiaWidgetExtension" target */,
+			);
+			path = musicaDoDiaWidget;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -26,6 +77,15 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		157E311B2F64980D0041B4EE /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				157E31232F64980D0041B4EE /* SwiftUI.framework in Frameworks */,
+				157E31212F64980D0041B4EE /* WidgetKit.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -33,6 +93,8 @@
 			isa = PBXGroup;
 			children = (
 				154A091D2F6349BB004F831C /* umaMusicaPorDiaProject */,
+				157E31242F64980D0041B4EE /* musicaDoDiaWidget */,
+				157E311F2F64980D0041B4EE /* Frameworks */,
 				154A091C2F6349BB004F831C /* Products */,
 			);
 			sourceTree = "<group>";
@@ -41,8 +103,18 @@
 			isa = PBXGroup;
 			children = (
 				154A091B2F6349BB004F831C /* umaMusicaPorDiaProject.app */,
+				157E311E2F64980D0041B4EE /* musicaDoDiaWidgetExtension.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		157E311F2F64980D0041B4EE /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				157E31202F64980D0041B4EE /* WidgetKit.framework */,
+				157E31222F64980D0041B4EE /* SwiftUI.framework */,
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -55,10 +127,12 @@
 				154A09172F6349BB004F831C /* Sources */,
 				154A09182F6349BB004F831C /* Frameworks */,
 				154A09192F6349BB004F831C /* Resources */,
+				157E31152F6495EE0041B4EE /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				157E31332F64980E0041B4EE /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				154A091D2F6349BB004F831C /* umaMusicaPorDiaProject */,
@@ -69,6 +143,28 @@
 			productName = umaMusicaPorDiaProject;
 			productReference = 154A091B2F6349BB004F831C /* umaMusicaPorDiaProject.app */;
 			productType = "com.apple.product-type.application";
+		};
+		157E311D2F64980D0041B4EE /* musicaDoDiaWidgetExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 157E31362F64980E0041B4EE /* Build configuration list for PBXNativeTarget "musicaDoDiaWidgetExtension" */;
+			buildPhases = (
+				157E311A2F64980D0041B4EE /* Sources */,
+				157E311B2F64980D0041B4EE /* Frameworks */,
+				157E311C2F64980D0041B4EE /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				157E31242F64980D0041B4EE /* musicaDoDiaWidget */,
+			);
+			name = musicaDoDiaWidgetExtension;
+			packageProductDependencies = (
+			);
+			productName = musicaDoDiaWidgetExtension;
+			productReference = 157E311E2F64980D0041B4EE /* musicaDoDiaWidgetExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
 		};
 /* End PBXNativeTarget section */
 
@@ -81,6 +177,9 @@
 				LastUpgradeCheck = 2620;
 				TargetAttributes = {
 					154A091A2F6349BB004F831C = {
+						CreatedOnToolsVersion = 26.2;
+					};
+					157E311D2F64980D0041B4EE = {
 						CreatedOnToolsVersion = 26.2;
 					};
 				};
@@ -100,12 +199,20 @@
 			projectRoot = "";
 			targets = (
 				154A091A2F6349BB004F831C /* umaMusicaPorDiaProject */,
+				157E311D2F64980D0041B4EE /* musicaDoDiaWidgetExtension */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		154A09192F6349BB004F831C /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		157E311C2F64980D0041B4EE /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -122,7 +229,22 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		157E311A2F64980D0041B4EE /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		157E31332F64980E0041B4EE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 157E311D2F64980D0041B4EE /* musicaDoDiaWidgetExtension */;
+			targetProxy = 157E31322F64980E0041B4EE /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		154A09242F6349BB004F831C /* Debug */ = {
@@ -262,6 +384,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -295,6 +418,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -305,6 +429,66 @@
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		157E31372F64980E0041B4EE /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 982D3NRR89;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = musicaDoDiaWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = musicaDoDiaWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dalpra.umaMusicaPorDiaProject.musicaDoDiaWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		157E31382F64980E0041B4EE /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 982D3NRR89;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = musicaDoDiaWidget/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = musicaDoDiaWidget;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dalpra.umaMusicaPorDiaProject.musicaDoDiaWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
@@ -329,6 +513,15 @@
 			buildConfigurations = (
 				154A09272F6349BB004F831C /* Debug */,
 				154A09282F6349BB004F831C /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		157E31362F64980E0041B4EE /* Build configuration list for PBXNativeTarget "musicaDoDiaWidgetExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				157E31372F64980E0041B4EE /* Debug */,
+				157E31382F64980E0041B4EE /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

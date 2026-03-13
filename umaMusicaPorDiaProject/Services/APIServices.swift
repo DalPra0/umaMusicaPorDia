@@ -1,16 +1,18 @@
 import Foundation
 
+nonisolated
 struct ITunesResponse: Codable, Sendable {
     let results: [ITunesTrack]
 }
 
-struct ITunesTrack: Codable, Sendable {
+struct ITunesTrack: Codable, Sendable, Identifiable {
+    var id: String { (trackName ?? "") + (artistName ?? "") }
     let trackName: String?
     let artistName: String?
     let releaseDate: String?
-    let primaryGenreName: String?
 }
 
+nonisolated
 struct YouTubeResponse: Codable, Sendable {
     let items: [YouTubeItem]
 }
@@ -23,39 +25,32 @@ struct VideoID: Codable, Sendable {
     let videoId: String
 }
 
+
 final class MusicService: Sendable {
-    func fetchTopTrack(year: Int, completion: @escaping @Sendable (String?, String?, String?) -> Void) {
+    func fetchTopTracks(year: Int, completion: @escaping @Sendable ([ITunesTrack], String) -> Void) {
         let calendar = Calendar.current
         let month = calendar.component(.month, from: Date())
         let monthString = String(format: "%02d", month)
         
-        // Buscamos músicas que estavam em evidência naquele mês/ano no Brasil
-        // Usamos um termo de busca que força o iTunes a olhar para o catálogo histórico
-        let query = "hits \(monthString) \(year)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
-        let urlString = "https://itunes.apple.com/search?term=\(query)&country=BR&media=music&limit=50&explicit=Yes"
+        let query = "hits \(year)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
+        let urlString = "https://itunes.apple.com/search?term=\(query)&country=BR&media=music&limit=30"
         
         guard let url = URL(string: urlString) else { return }
         
         URLSession.shared.dataTask(with: url) { data, _, _ in
             guard let data = data else {
-                completion(nil, nil, urlString)
+                completion([], urlString)
                 return
             }
             
             do {
                 let response = try JSONDecoder().decode(ITunesResponse.self, from: data)
-                
-                // Filtramos para pegar músicas que REALMENTE são daquela época
-                // O iTunes traz muita coisa, então validamos a releaseDate
                 let filtered = response.results.filter { track in
-                    guard let date = track.releaseDate else { return false }
-                    return date.contains("\(year)-\(monthString)") || date.contains("\(year)")
+                    track.releaseDate?.contains("\(year)") ?? false
                 }
-                
-                let track = filtered.randomElement() ?? response.results.randomElement()
-                completion(track?.trackName, track?.artistName, urlString)
+                completion(filtered.isEmpty ? response.results : filtered, urlString)
             } catch {
-                completion(nil, nil, urlString)
+                completion([], urlString)
             }
         }.resume()
     }
