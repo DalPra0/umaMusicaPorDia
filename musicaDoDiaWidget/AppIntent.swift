@@ -1,10 +1,3 @@
-//
-//  AppIntent.swift
-//  musicaDoDiaWidget
-//
-//  Created by Lucas Dal Pra Brascher on 13/03/26.
-//
-
 import WidgetKit
 import AppIntents
 

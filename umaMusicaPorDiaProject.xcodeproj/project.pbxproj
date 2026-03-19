@@ -10,6 +10,11 @@
 		157E31212F64980D0041B4EE /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 157E31202F64980D0041B4EE /* WidgetKit.framework */; };
 		157E31232F64980D0041B4EE /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 157E31222F64980D0041B4EE /* SwiftUI.framework */; };
 		157E31342F64980E0041B4EE /* musicaDoDiaWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 157E311E2F64980D0041B4EE /* musicaDoDiaWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		158E21F02F6C7114003D863A /* Auth in Frameworks */ = {isa = PBXBuildFile; productRef = 158E21EF2F6C7114003D863A /* Auth */; };
+		158E21F22F6C7114003D863A /* Functions in Frameworks */ = {isa = PBXBuildFile; productRef = 158E21F12F6C7114003D863A /* Functions */; };
+		158E21F42F6C7114003D863A /* PostgREST in Frameworks */ = {isa = PBXBuildFile; productRef = 158E21F32F6C7114003D863A /* PostgREST */; };
+		158E21F62F6C7114003D863A /* Realtime in Frameworks */ = {isa = PBXBuildFile; productRef = 158E21F52F6C7114003D863A /* Realtime */; };
+		158E21F82F6C7114003D863A /* Storage in Frameworks */ = {isa = PBXBuildFile; productRef = 158E21F72F6C7114003D863A /* Storage */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -74,6 +79,11 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				158E21F42F6C7114003D863A /* PostgREST in Frameworks */,
+				158E21F22F6C7114003D863A /* Functions in Frameworks */,
+				158E21F02F6C7114003D863A /* Auth in Frameworks */,
+				158E21F82F6C7114003D863A /* Storage in Frameworks */,
+				158E21F62F6C7114003D863A /* Realtime in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -139,6 +149,11 @@
 			);
 			name = umaMusicaPorDiaProject;
 			packageProductDependencies = (
+				158E21EF2F6C7114003D863A /* Auth */,
+				158E21F12F6C7114003D863A /* Functions */,
+				158E21F32F6C7114003D863A /* PostgREST */,
+				158E21F52F6C7114003D863A /* Realtime */,
+				158E21F72F6C7114003D863A /* Storage */,
 			);
 			productName = umaMusicaPorDiaProject;
 			productReference = 154A091B2F6349BB004F831C /* umaMusicaPorDiaProject.app */;
@@ -193,6 +208,9 @@
 			);
 			mainGroup = 154A09122F6349BB004F831C;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				158E21EE2F6C7114003D863A /* XCRemoteSwiftPackageReference "supabase-swift" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 154A091C2F6349BB004F831C /* Products */;
 			projectDirPath = "";
@@ -379,6 +397,7 @@
 				DEVELOPMENT_TEAM = 982D3NRR89;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "LunchBox Daily";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -413,6 +432,7 @@
 				DEVELOPMENT_TEAM = 982D3NRR89;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = "LunchBox Daily";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -527,6 +547,45 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		158E21EE2F6C7114003D863A /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase/supabase-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.5.1;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		158E21EF2F6C7114003D863A /* Auth */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 158E21EE2F6C7114003D863A /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Auth;
+		};
+		158E21F12F6C7114003D863A /* Functions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 158E21EE2F6C7114003D863A /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Functions;
+		};
+		158E21F32F6C7114003D863A /* PostgREST */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 158E21EE2F6C7114003D863A /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = PostgREST;
+		};
+		158E21F52F6C7114003D863A /* Realtime */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 158E21EE2F6C7114003D863A /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Realtime;
+		};
+		158E21F72F6C7114003D863A /* Storage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 158E21EE2F6C7114003D863A /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Storage;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 154A09132F6349BB004F831C /* Project object */;
 }
