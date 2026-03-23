@@ -53,6 +53,24 @@ struct ContentView: View {
                 Text("Flashback Diário")
                     .font(.largeTitle).bold()
                 
+                if let word = viewModel.dailyWord {
+                    VStack {
+                        Text("PALAVRA DO DIA")
+                            .font(.caption)
+                            .tracking(2)
+                            .foregroundColor(.secondary)
+                        Text(word.word)
+                            .font(.title2)
+                            .bold()
+                            .foregroundColor(.purple)
+                    }
+                    .padding()
+                    .background(Color.purple.opacity(0.1))
+                    .cornerRadius(15)
+                } else if viewModel.isLoadingWord {
+                    ProgressView("Buscando palavra do dia...")
+                }
+                
                 Text("Hoje: \(viewModel.selectedDayMonth)/\(String(viewModel.selectedYear))")
                     .font(.title2).foregroundColor(.blue)
                 
@@ -105,6 +123,6 @@ struct ContentView: View {
             }
             .padding()
         }
-        .onAppear { viewModel.loadDailyNostalgia() }
+        .onAppear { viewModel.loadInitialData() }
     }
 }

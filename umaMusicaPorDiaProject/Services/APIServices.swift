@@ -29,8 +29,7 @@ struct VideoID: Codable, Sendable {
 final class MusicService: Sendable {
     func fetchTopTracks(year: Int, completion: @escaping @Sendable ([ITunesTrack], String) -> Void) {
         let calendar = Calendar.current
-        let month = calendar.component(.month, from: Date())
-        let monthString = String(format: "%02d", month)
+        _ = calendar.component(.month, from: Date())
         
         let query = "hits \(year)".addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) ?? ""
         let urlString = "https://itunes.apple.com/search?term=\(query)&country=BR&media=music&limit=30"

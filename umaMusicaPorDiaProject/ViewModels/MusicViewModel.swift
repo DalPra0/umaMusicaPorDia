@@ -1,5 +1,6 @@
 import Foundation
 import Combine
+import Supabase
 
 class MusicViewModel: ObservableObject {
     @Published var trackName: String = "Carregando..."
@@ -8,11 +9,52 @@ class MusicViewModel: ObservableObject {
     @Published var selectedYear: Int = 0
     @Published var selectedDayMonth: String = ""
     
+    // Novas propriedades para o Supabase
+    @Published var dailyWord: DailyWord?
+    @Published var isLoadingWord: Bool = false
+    @Published var errorMessage: String?
+    
     @Published var tracksFound: [ITunesTrack] = []
     @Published var appleMusicUrl: String = ""
     
     private let musicService = MusicService()
     private let youtubeService = YouTubeService()
+    private let supabaseService = SupabaseService.shared
+    
+    func loadInitialData() {
+        Task {
+            await fetchDailyWord()
+            loadDailyNostalgia()
+        }
+    }
+    
+    @MainActor
+    func fetchDailyWord() async {
+        isLoadingWord = true
+        do {
+            self.dailyWord = try await supabaseService.fetchDailyWord()
+        } catch {
+            print("DEBUG: Nenhuma palavra para hoje. Tentando sortear uma nova...")
+            // Tenta sortear uma se não houver nenhuma
+            await refreshWord()
+        }
+        isLoadingWord = false
+    }
+    
+    @MainActor
+    func refreshWord() async {
+        isLoadingWord = true
+        dailyWord = nil // Limpa para dar o efeito de carregamento
+        do {
+            try await supabaseService.refreshDailyWord()
+            // Aguarda 1 segundo para o banco processar a mudança
+            try? await Task.sleep(nanoseconds: 1_000_000_000)
+            await fetchDailyWord()
+        } catch {
+            self.errorMessage = "Erro ao sortear: \(error.localizedDescription)"
+        }
+        isLoadingWord = false
+    }
     
     func loadDailyNostalgia() {
         let calendar = Calendar.current
@@ -44,6 +86,17 @@ class MusicViewModel: ObservableObject {
                     self.trackName = "Nenhum hit encontrado em \(year)"
                 }
             }
+        }
+    }
+    
+    // Função para salvar a colagem
+    func saveUserCollage(imageData: Data, assets: [CollageAsset]) async {
+        guard let wordId = dailyWord?.id else { return }
+        do {
+            try await supabaseService.saveCollage(wordId: wordId, imageData: imageData, assets: assets)
+            print("Colagem salva com sucesso!")
+        } catch {
+            print("Erro ao salvar colagem: \(error)")
         }
     }
 }

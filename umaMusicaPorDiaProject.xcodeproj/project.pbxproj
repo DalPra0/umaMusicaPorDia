@@ -15,6 +15,12 @@
 		158E21F42F6C7114003D863A /* PostgREST in Frameworks */ = {isa = PBXBuildFile; productRef = 158E21F32F6C7114003D863A /* PostgREST */; };
 		158E21F62F6C7114003D863A /* Realtime in Frameworks */ = {isa = PBXBuildFile; productRef = 158E21F52F6C7114003D863A /* Realtime */; };
 		158E21F82F6C7114003D863A /* Storage in Frameworks */ = {isa = PBXBuildFile; productRef = 158E21F72F6C7114003D863A /* Storage */; };
+		158E22012F6C7377003D863A /* ReceiptParser in Frameworks */ = {isa = PBXBuildFile; productRef = 158E22002F6C7377003D863A /* ReceiptParser */; };
+		158E22032F6C7378003D863A /* RevenueCat in Frameworks */ = {isa = PBXBuildFile; productRef = 158E22022F6C7377003D863A /* RevenueCat */; };
+		158E22052F6C7378003D863A /* RevenueCatUI in Frameworks */ = {isa = PBXBuildFile; productRef = 158E22042F6C7378003D863A /* RevenueCatUI */; };
+		158E22142F6DD965003D863A /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 158E22132F6DD965003D863A /* Supabase */; };
+		158E22252F6DE129003D863A /* ShareNostalgia.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 158E221B2F6DE129003D863A /* ShareNostalgia.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		15EFED9E2F71AF2C00DF8471 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 15EFED9D2F71AF2C00DF8471 /* Supabase */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -24,6 +30,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 157E311D2F64980D0041B4EE;
 			remoteInfo = musicaDoDiaWidgetExtension;
+		};
+		158E22232F6DE129003D863A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 154A09132F6349BB004F831C /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 158E221A2F6DE129003D863A;
+			remoteInfo = ShareNostalgia;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -35,6 +48,7 @@
 			dstSubfolderSpec = 13;
 			files = (
 				157E31342F64980E0041B4EE /* musicaDoDiaWidgetExtension.appex in Embed Foundation Extensions */,
+				158E22252F6DE129003D863A /* ShareNostalgia.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -46,6 +60,8 @@
 		157E311E2F64980D0041B4EE /* musicaDoDiaWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = musicaDoDiaWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		157E31202F64980D0041B4EE /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		157E31222F64980D0041B4EE /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		158E221B2F6DE129003D863A /* ShareNostalgia.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ShareNostalgia.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		158E222A2F6DE155003D863A /* musicaDoDiaWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = musicaDoDiaWidgetExtension.entitlements; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -55,6 +71,13 @@
 				Info.plist,
 			);
 			target = 157E311D2F64980D0041B4EE /* musicaDoDiaWidgetExtension */;
+		};
+		158E22262F6DE129003D863A /* Exceptions for "ShareNostalgia" folder in "ShareNostalgia" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = 158E221A2F6DE129003D863A /* ShareNostalgia */;
 		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
@@ -72,6 +95,14 @@
 			path = musicaDoDiaWidget;
 			sourceTree = "<group>";
 		};
+		158E221C2F6DE129003D863A /* ShareNostalgia */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				158E22262F6DE129003D863A /* Exceptions for "ShareNostalgia" folder in "ShareNostalgia" target */,
+			);
+			path = ShareNostalgia;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -79,8 +110,12 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				158E22012F6C7377003D863A /* ReceiptParser in Frameworks */,
 				158E21F42F6C7114003D863A /* PostgREST in Frameworks */,
+				158E22032F6C7378003D863A /* RevenueCat in Frameworks */,
 				158E21F22F6C7114003D863A /* Functions in Frameworks */,
+				158E22052F6C7378003D863A /* RevenueCatUI in Frameworks */,
+				158E22142F6DD965003D863A /* Supabase in Frameworks */,
 				158E21F02F6C7114003D863A /* Auth in Frameworks */,
 				158E21F82F6C7114003D863A /* Storage in Frameworks */,
 				158E21F62F6C7114003D863A /* Realtime in Frameworks */,
@@ -96,14 +131,24 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		158E22182F6DE129003D863A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				15EFED9E2F71AF2C00DF8471 /* Supabase in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
 		154A09122F6349BB004F831C = {
 			isa = PBXGroup;
 			children = (
+				158E222A2F6DE155003D863A /* musicaDoDiaWidgetExtension.entitlements */,
 				154A091D2F6349BB004F831C /* umaMusicaPorDiaProject */,
 				157E31242F64980D0041B4EE /* musicaDoDiaWidget */,
+				158E221C2F6DE129003D863A /* ShareNostalgia */,
 				157E311F2F64980D0041B4EE /* Frameworks */,
 				154A091C2F6349BB004F831C /* Products */,
 			);
@@ -114,6 +159,7 @@
 			children = (
 				154A091B2F6349BB004F831C /* umaMusicaPorDiaProject.app */,
 				157E311E2F64980D0041B4EE /* musicaDoDiaWidgetExtension.appex */,
+				158E221B2F6DE129003D863A /* ShareNostalgia.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -143,6 +189,7 @@
 			);
 			dependencies = (
 				157E31332F64980E0041B4EE /* PBXTargetDependency */,
+				158E22242F6DE129003D863A /* PBXTargetDependency */,
 			);
 			fileSystemSynchronizedGroups = (
 				154A091D2F6349BB004F831C /* umaMusicaPorDiaProject */,
@@ -154,6 +201,10 @@
 				158E21F32F6C7114003D863A /* PostgREST */,
 				158E21F52F6C7114003D863A /* Realtime */,
 				158E21F72F6C7114003D863A /* Storage */,
+				158E22002F6C7377003D863A /* ReceiptParser */,
+				158E22022F6C7377003D863A /* RevenueCat */,
+				158E22042F6C7378003D863A /* RevenueCatUI */,
+				158E22132F6DD965003D863A /* Supabase */,
 			);
 			productName = umaMusicaPorDiaProject;
 			productReference = 154A091B2F6349BB004F831C /* umaMusicaPorDiaProject.app */;
@@ -181,6 +232,29 @@
 			productReference = 157E311E2F64980D0041B4EE /* musicaDoDiaWidgetExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		158E221A2F6DE129003D863A /* ShareNostalgia */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 158E22272F6DE129003D863A /* Build configuration list for PBXNativeTarget "ShareNostalgia" */;
+			buildPhases = (
+				158E22172F6DE129003D863A /* Sources */,
+				158E22182F6DE129003D863A /* Frameworks */,
+				158E22192F6DE129003D863A /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				158E221C2F6DE129003D863A /* ShareNostalgia */,
+			);
+			name = ShareNostalgia;
+			packageProductDependencies = (
+				15EFED9D2F71AF2C00DF8471 /* Supabase */,
+			);
+			productName = ShareNostalgia;
+			productReference = 158E221B2F6DE129003D863A /* ShareNostalgia.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -197,6 +271,9 @@
 					157E311D2F64980D0041B4EE = {
 						CreatedOnToolsVersion = 26.2;
 					};
+					158E221A2F6DE129003D863A = {
+						CreatedOnToolsVersion = 26.2;
+					};
 				};
 			};
 			buildConfigurationList = 154A09162F6349BB004F831C /* Build configuration list for PBXProject "umaMusicaPorDiaProject" */;
@@ -210,6 +287,7 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				158E21EE2F6C7114003D863A /* XCRemoteSwiftPackageReference "supabase-swift" */,
+				158E21FF2F6C7377003D863A /* XCRemoteSwiftPackageReference "purchases-ios-spm" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 154A091C2F6349BB004F831C /* Products */;
@@ -218,6 +296,7 @@
 			targets = (
 				154A091A2F6349BB004F831C /* umaMusicaPorDiaProject */,
 				157E311D2F64980D0041B4EE /* musicaDoDiaWidgetExtension */,
+				158E221A2F6DE129003D863A /* ShareNostalgia */,
 			);
 		};
 /* End PBXProject section */
@@ -231,6 +310,13 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		157E311C2F64980D0041B4EE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		158E22192F6DE129003D863A /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -254,6 +340,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		158E22172F6DE129003D863A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -261,6 +354,11 @@
 			isa = PBXTargetDependency;
 			target = 157E311D2F64980D0041B4EE /* musicaDoDiaWidgetExtension */;
 			targetProxy = 157E31322F64980E0041B4EE /* PBXContainerItemProxy */;
+		};
+		158E22242F6DE129003D863A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 158E221A2F6DE129003D863A /* ShareNostalgia */;
+			targetProxy = 158E22232F6DE129003D863A /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -403,7 +501,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -438,7 +536,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 17.6;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -461,6 +559,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = musicaDoDiaWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 982D3NRR89;
@@ -468,6 +567,7 @@
 				INFOPLIST_FILE = musicaDoDiaWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = musicaDoDiaWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -491,6 +591,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				ASSETCATALOG_COMPILER_WIDGET_BACKGROUND_COLOR_NAME = WidgetBackground;
+				CODE_SIGN_ENTITLEMENTS = musicaDoDiaWidgetExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = 982D3NRR89;
@@ -498,6 +599,7 @@
 				INFOPLIST_FILE = musicaDoDiaWidget/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = musicaDoDiaWidget;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -505,6 +607,66 @@
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = dalpra.umaMusicaPorDiaProject.musicaDoDiaWidget;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		158E22282F6DE129003D863A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ShareNostalgia/ShareNostalgia.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 982D3NRR89;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ShareNostalgia/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ShareNostalgia;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dalpra.umaMusicaPorDiaProject.ShareNostalgia;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				STRING_CATALOG_GENERATE_SYMBOLS = YES;
+				SWIFT_APPROACHABLE_CONCURRENCY = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		158E22292F6DE129003D863A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = ShareNostalgia/ShareNostalgia.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 982D3NRR89;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ShareNostalgia/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ShareNostalgia;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 18.6;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = dalpra.umaMusicaPorDiaProject.ShareNostalgia;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
@@ -546,6 +708,15 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		158E22272F6DE129003D863A /* Build configuration list for PBXNativeTarget "ShareNostalgia" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				158E22282F6DE129003D863A /* Debug */,
+				158E22292F6DE129003D863A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
@@ -555,6 +726,14 @@
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 2.5.1;
+			};
+		};
+		158E21FF2F6C7377003D863A /* XCRemoteSwiftPackageReference "purchases-ios-spm" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/RevenueCat/purchases-ios-spm.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 5.66.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -584,6 +763,31 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 158E21EE2F6C7114003D863A /* XCRemoteSwiftPackageReference "supabase-swift" */;
 			productName = Storage;
+		};
+		158E22002F6C7377003D863A /* ReceiptParser */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 158E21FF2F6C7377003D863A /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
+			productName = ReceiptParser;
+		};
+		158E22022F6C7377003D863A /* RevenueCat */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 158E21FF2F6C7377003D863A /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
+			productName = RevenueCat;
+		};
+		158E22042F6C7378003D863A /* RevenueCatUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 158E21FF2F6C7377003D863A /* XCRemoteSwiftPackageReference "purchases-ios-spm" */;
+			productName = RevenueCatUI;
+		};
+		158E22132F6DD965003D863A /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 158E21EE2F6C7114003D863A /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+		15EFED9D2F71AF2C00DF8471 /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 158E21EE2F6C7114003D863A /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
