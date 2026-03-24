@@ -13,18 +13,18 @@ struct HomeView: View {
                     .foregroundColor(.secondary)
                 
                 VStack(spacing: 15) {
-                    NavigationLink(destination: ContentView()) {
-                        HStack {
-                            Image(systemName: "music.note")
-                            Text("Flashback Diário")
-                        }
-                        .bold()
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(12)
-                    }
+//                    NavigationLink(destination: ContentView()) {
+//                        HStack {
+//                            Image(systemName: "music.note")
+//                            Text("Flashback Diário")
+//                        }
+//                        .bold()
+//                        .frame(maxWidth: .infinity)
+//                        .padding()
+//                        .background(Color.blue)
+//                        .foregroundColor(.white)
+//                        .cornerRadius(12)
+//                    }
                     
                     NavigationLink(destination: CollageCreatorView()) {
                         HStack {
