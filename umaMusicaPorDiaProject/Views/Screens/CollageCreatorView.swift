@@ -1,27 +1,60 @@
 import SwiftUI
 import PhotosUI
 
-struct CollageItem: Identifiable {
-    let id = UUID()
+// MARK: - Modelos e Helpers
+
+struct CollageItem: Identifiable, Equatable {
+    let id: UUID
     var image: UIImage
-    var offset: CGSize = .zero
-    var lastOffset: CGSize = .zero
-    var scale: CGFloat = 1.0
-    var lastScale: CGFloat = 1.0
-    var rotation: Angle = .zero
-    var lastRotation: Angle = .zero
+    var offset: CGSize
+    var lastOffset: CGSize
+    var scale: CGFloat
+    var lastScale: CGFloat
+    var rotation: Angle
+    var lastRotation: Angle
+    
+    init(id: UUID = UUID(), image: UIImage, offset: CGSize = .zero, lastOffset: CGSize = .zero, scale: CGFloat = 1.0, lastScale: CGFloat = 1.0, rotation: Angle = .zero, lastRotation: Angle = .zero) {
+        self.id = id
+        self.image = image
+        self.offset = offset
+        self.lastOffset = lastOffset
+        self.scale = scale
+        self.lastScale = lastScale
+        self.rotation = rotation
+        self.lastRotation = lastRotation
+    }
+    
+    static func == (lhs: CollageItem, rhs: CollageItem) -> Bool {
+        lhs.id == rhs.id &&
+        lhs.offset == rhs.offset &&
+        lhs.scale == rhs.scale &&
+        lhs.rotation == rhs.rotation
+    }
 }
+
+// MARK: - View Principal
 
 struct CollageCreatorView: View {
     @StateObject private var viewModel = MusicViewModel()
     @State private var items: [CollageItem] = []
     @State private var selectedItems: [PhotosPickerItem] = []
+    
+    @State private var canvasColor: Color = .white
+    @State private var undoStack: [[CollageItem]] = []
+    @State private var redoStack: [[CollageItem]] = []
+    
+    @State private var showLayers = false
     @State private var isSaving = false
     
-    // Canvas para o Snapshot
-    var canvas: some View {
+    // Navegação para Exportação
+    @State private var renderedImage: UIImage?
+    @State private var navigateToExport = false
+    
+    @Environment(\.dismiss) var dismiss
+
+    var captureCanvas: some View {
         ZStack {
-            Color.white // Fundo da colagem
+            canvasColor
             
             ForEach(items) { item in
                 Image(uiImage: item.image)
@@ -33,127 +66,239 @@ struct CollageCreatorView: View {
                     .offset(item.offset)
             }
         }
-        .frame(width: 400, height: 500) // Tamanho fixo para a colagem final
+        .frame(width: 1080/3, height: 1920/3)
     }
 
     var body: some View {
-        VStack {
-            // 1. Cabeçalho com Palavra + Sorteio
-            HStack {
-                if let word = viewModel.dailyWord {
-                    Text(word.word.uppercased())
-                        .font(.system(size: 24, weight: .black, design: .serif))
-                        .italic()
-                        .foregroundColor(.purple)
-                } else {
-                    Text("SEM PALAVRA")
-                        .foregroundColor(.gray)
-                }
+        ZStack {
+            Color(hex: "D9D9D9")
+                .ignoresSafeArea()
+            
+            VStack(spacing: 0) {
+                topBar
+                    .padding(.horizontal, 20)
+                    .padding(.top, 10)
                 
-                Button(action: {
-                    Task { await viewModel.refreshWord() }
-                }) {
-                    Image(systemName: "shuffle")
-                        .font(.caption)
-                        .padding(8)
-                        .background(Color.purple.opacity(0.1))
-                        .clipShape(Circle())
-                }
-            }
-            .padding(.top)
-
-            // 2. Área Interativa
-            ZStack {
-                RoundedRectangle(cornerRadius: 15)
-                    .fill(Color.gray.opacity(0.1))
-                    .overlay(
-                        Text(items.isEmpty ? "Adicione imagens nostálgicas..." : "")
-                            .foregroundColor(.gray)
-                    )
+                titleArea
+                    .padding(.horizontal, 44)
+                    .padding(.top, 24)
+                    .padding(.bottom, 20)
                 
-                // Canvas real onde o usuário mexe
-                ForEach($items) { $item in
-                    Image(uiImage: item.image)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 200)
-                        .rotationEffect(item.rotation)
-                        .scaleEffect(item.scale)
-                        .offset(item.offset)
-                        .gesture(
-                            DragGesture()
-                                .onChanged { value in
-                                    item.offset = CGSize(
-                                        width: item.lastOffset.width + value.translation.width,
-                                        height: item.lastOffset.height + value.translation.height
-                                    )
-                                }
-                                .onEnded { _ in item.lastOffset = item.offset }
-                        )
-                        .gesture(
-                            MagnificationGesture()
-                                .onChanged { value in item.scale = item.lastScale * value }
-                                .onEnded { _ in item.lastScale = item.scale }
-                                .simultaneously(with: RotationGesture()
-                                    .onChanged { value in item.rotation = item.lastRotation + value }
-                                    .onEnded { _ in item.lastRotation = item.rotation }
-                                )
-                        )
-                }
-            }
-            .clipped()
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(Color.white)
-            .cornerRadius(12)
-            .shadow(radius: 5)
-            .padding()
-
-            // 3. Controles
-            HStack(spacing: 20) {
-                PhotosPicker(selection: $selectedItems, matching: .images) {
-                    Label("IMG", systemImage: "photo.badge.plus")
-                        .bold().padding().background(Color.blue.opacity(0.1)).cornerRadius(12)
-                }
+                interactiveCanvas
+                    .frame(width: 302, height: 536)
+                    .clipped()
+                    .background(canvasColor)
+                    .shadow(color: .black.opacity(0.1), radius: 10)
                 
-                Button(action: saveCollage) {
-                    if isSaving {
-                        ProgressView().padding()
-                    } else {
-                        Label("SALVAR", systemImage: "icloud.and.arrow.up.fill")
-                            .bold().padding().background(items.isEmpty ? Color.gray : Color.green)
-                            .foregroundColor(.white).cornerRadius(12)
-                    }
-                }
-                .disabled(items.isEmpty || isSaving)
+                Spacer()
+                
+                bottomBar
+                    .padding(.horizontal, 30)
+                    .padding(.bottom, 20)
             }
-            .padding(.bottom)
         }
+        .navigationDestination(isPresented: $navigateToExport) {
+            if let image = renderedImage {
+                ExportView(renderedImage: image)
+            }
+        }
+        .navigationBarHidden(true)
         .onAppear { viewModel.loadInitialData() }
         .onChange(of: selectedItems) { _, _ in loadSelectedImages() }
+        .sheet(isPresented: $showLayers) {
+            LayersSheet(items: $items, onSaveState: saveState)
+                .presentationDetents([.medium])
+        }
     }
-
+    
+    private var topBar: some View {
+        HStack {
+            Button(action: { dismiss() }) {
+                Image(systemName: "chevron.left")
+                    .font(.system(size: 20, weight: .medium))
+                    .foregroundColor(.black)
+            }
+            
+            Spacer()
+            
+            HStack(spacing: 20) {
+                Button(action: undo) {
+                    Image(systemName: "arrow.uturn.backward.circle")
+                        .font(.system(size: 24))
+                        .foregroundColor(undoStack.isEmpty ? .gray : .black)
+                }
+                .disabled(undoStack.isEmpty)
+                
+                Button(action: redo) {
+                    Image(systemName: "arrow.uturn.forward.circle")
+                        .font(.system(size: 24))
+                        .foregroundColor(redoStack.isEmpty ? .gray : .black)
+                }
+                .disabled(redoStack.isEmpty)
+            }
+            
+            Spacer()
+            
+            Button(action: prepareExport) {
+                if isSaving {
+                    ProgressView()
+                } else {
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.system(size: 20, weight: .medium))
+                        .foregroundColor(.black)
+                }
+            }
+            .disabled(isSaving || items.isEmpty)
+        }
+    }
+    
+    private var titleArea: some View {
+        VStack(alignment: .leading, spacing: 4) {
+            Text("A palavra do dia é:")
+                .font(.system(size: 16))
+                .foregroundColor(Color(hex: "4A4242"))
+                .tracking(-0.31)
+                .frame(maxWidth: .infinity, alignment: .leading)
+            
+            if let word = viewModel.dailyWord {
+                Text(word.word.uppercased())
+                    .font(.system(size: 34, weight: .bold))
+                    .foregroundColor(Color(hex: "4A4242"))
+                    .tracking(0.4)
+            } else {
+                Text("CARREGANDO...")
+                    .font(.system(size: 34, weight: .bold))
+                    .foregroundColor(.gray)
+            }
+        }
+    }
+    
+    private var interactiveCanvas: some View {
+        ZStack {
+            ForEach($items) { $item in
+                Image(uiImage: item.image)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 200)
+                    .rotationEffect(item.rotation)
+                    .scaleEffect(item.scale)
+                    .offset(item.offset)
+                    .gesture(
+                        DragGesture()
+                            .onChanged { value in
+                                item.offset = CGSize(
+                                    width: item.lastOffset.width + value.translation.width,
+                                    height: item.lastOffset.height + value.translation.height
+                                )
+                            }
+                            .onEnded { _ in
+                                item.lastOffset = item.offset
+                                saveState()
+                            }
+                    )
+                    .gesture(
+                        MagnificationGesture()
+                            .onChanged { value in item.scale = item.lastScale * value }
+                            .onEnded { _ in
+                                item.lastScale = item.scale
+                                saveState()
+                            }
+                            .simultaneously(with: RotationGesture()
+                                .onChanged { value in item.rotation = item.lastRotation + value }
+                                .onEnded { _ in
+                                    item.lastRotation = item.rotation
+                                    saveState()
+                                }
+                            )
+                    )
+            }
+        }
+    }
+    
+    private var bottomBar: some View {
+        HStack {
+            Button(action: { showLayers = true }) {
+                VStack(spacing: 8) {
+                    Image(systemName: "square.3.layers.3d")
+                        .font(.system(size: 24))
+                    Text("Layers")
+                        .font(.system(size: 10, weight: .medium))
+                }
+                .foregroundColor(.black)
+                .frame(maxWidth: .infinity)
+            }
+            
+            PhotosPicker(selection: $selectedItems, matching: .images) {
+                VStack(spacing: 8) {
+                    Image(systemName: "photo")
+                        .font(.system(size: 24))
+                    Text("Images")
+                        .font(.system(size: 10, weight: .medium))
+                }
+                .foregroundColor(.black)
+                .frame(maxWidth: .infinity)
+            }
+            
+            Button(action: {
+                saveState()
+                canvasColor = canvasColor == .white ? Color(hex: "F0F0F0") : .white
+            }) {
+                VStack(spacing: 8) {
+                    Image(systemName: "arrow.up.left.and.arrow.down.right")
+                        .font(.system(size: 24))
+                    Text("Canvas")
+                        .font(.system(size: 10, weight: .medium))
+                }
+                .foregroundColor(.black)
+                .frame(maxWidth: .infinity)
+            }
+        }
+    }
+    
     func loadSelectedImages() {
         for item in selectedItems {
             Task {
                 if let data = try? await item.loadTransferable(type: Data.self),
                    let uiImage = UIImage(data: data) {
-                    await MainActor.run { items.append(CollageItem(image: uiImage)) }
+                    await MainActor.run {
+                        saveState()
+                        items.append(CollageItem(image: uiImage))
+                    }
                 }
             }
         }
         selectedItems = []
     }
-
+    
+    private func saveState() {
+        if undoStack.count > 20 { undoStack.removeFirst() }
+        undoStack.append(items)
+        redoStack.removeAll()
+    }
+    
+    private func undo() {
+        guard let lastState = undoStack.popLast() else { return }
+        redoStack.append(items)
+        items = lastState
+    }
+    
+    private func redo() {
+        guard let nextState = redoStack.popLast() else { return }
+        undoStack.append(items)
+        items = nextState
+    }
+    
     @MainActor
-    func saveCollage() {
+    func prepareExport() {
         isSaving = true
         
-        // --- NOVO SNAPSHOT REAL ---
-        let renderer = ImageRenderer(content: canvas)
-        renderer.scale = 3.0 // Alta qualidade para o banco
+        let renderer = ImageRenderer(content: captureCanvas)
+        renderer.scale = 3.0
         
         if let uiImage = renderer.uiImage,
            let imageData = uiImage.jpegData(compressionQuality: 0.8) {
+            
+            self.renderedImage = uiImage
             
             let assets = items.map { item in
                 CollageAsset(id: item.id.uuidString, x: Double(item.offset.width), y: Double(item.offset.height),
@@ -163,10 +308,48 @@ struct CollageCreatorView: View {
             Task {
                 await viewModel.saveUserCollage(imageData: imageData, assets: assets)
                 isSaving = false
-                items = [] // Limpa após salvar
+                navigateToExport = true // Navega para a nova tela
             }
         } else {
             isSaving = false
+        }
+    }
+}
+
+struct LayersSheet: View {
+    @Binding var items: [CollageItem]
+    var onSaveState: () -> Void
+    
+    var body: some View {
+        NavigationView {
+            List {
+                ForEach(items.reversed()) { item in
+                    HStack {
+                        Image(uiImage: item.image)
+                            .resizable()
+                            .scaledToFill()
+                            .frame(width: 40, height: 40)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                        Text("Imagem")
+                            .font(.subheadline)
+                    }
+                }
+                .onMove { source, destination in
+                    onSaveState()
+                    var reversedItems = Array(items.reversed())
+                    reversedItems.move(fromOffsets: source, toOffset: destination)
+                    items = Array(reversedItems.reversed())
+                }
+                .onDelete { indexSet in
+                    onSaveState()
+                    var reversedItems = Array(items.reversed())
+                    reversedItems.remove(atOffsets: indexSet)
+                    items = Array(reversedItems.reversed())
+                }
+            }
+            .navigationTitle("Camadas")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar { EditButton() }
         }
     }
 }

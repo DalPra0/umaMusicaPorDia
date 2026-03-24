@@ -12,7 +12,6 @@ class SupabaseService {
     
     private init() {}
     
-    // 1. Login Anônimo (Necessário para a política RLS)
     // 1. Autenticação Real
     func signUp(email: String, password: String) async throws {
         try await client.auth.signUp(email: email, password: password)
