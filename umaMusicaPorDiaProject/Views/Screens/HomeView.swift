@@ -13,19 +13,6 @@ struct HomeView: View {
                     .foregroundColor(.secondary)
                 
                 VStack(spacing: 15) {
-//                    NavigationLink(destination: ContentView()) {
-//                        HStack {
-//                            Image(systemName: "music.note")
-//                            Text("Flashback Diário")
-//                        }
-//                        .bold()
-//                        .frame(maxWidth: .infinity)
-//                        .padding()
-//                        .background(Color.blue)
-//                        .foregroundColor(.white)
-//                        .cornerRadius(12)
-//                    }
-                    
                     NavigationLink(destination: CollageCreatorView()) {
                         HStack {
                             Image(systemName: "plus.square.on.square")
@@ -36,6 +23,23 @@ struct HomeView: View {
                         .padding()
                         .background(Color.purple)
                         .foregroundColor(.white)
+                        .cornerRadius(12)
+                    }
+                    
+                    Button(action: {
+                        Task {
+                            try? await SupabaseService.shared.signOut()
+                        }
+                    }) {
+                        HStack {
+                            Image(systemName: "door.left.hand.open")
+                            Text("Sair da Conta")
+                        }
+                        .bold()
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(Color.red.opacity(0.1))
+                        .foregroundColor(.red)
                         .cornerRadius(12)
                     }
                 }

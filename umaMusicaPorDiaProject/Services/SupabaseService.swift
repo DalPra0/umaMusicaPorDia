@@ -30,12 +30,6 @@ class SupabaseService {
         return client.auth.currentSession?.user
     }
 
-    // 1.1 Login Anônimo (Fallback)
-    func signInAnonymously() async throws -> User {
-        let session = try await client.auth.signInAnonymously()
-        return session.user
-    }
-
     // 2. Buscar a palavra do dia (Usando decodificação manual de dados para evitar erros de tipo)
     func fetchDailyWord() async throws -> DailyWord {
         let formatter = DateFormatter()

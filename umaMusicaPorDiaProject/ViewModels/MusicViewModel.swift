@@ -9,7 +9,6 @@ class MusicViewModel: ObservableObject {
     @Published var selectedYear: Int = 0
     @Published var selectedDayMonth: String = ""
     
-    // Novas propriedades para o Supabase
     @Published var dailyWord: DailyWord?
     @Published var isLoadingWord: Bool = false
     @Published var errorMessage: String?
@@ -89,7 +88,6 @@ class MusicViewModel: ObservableObject {
         }
     }
     
-    // Função para salvar a colagem
     func saveUserCollage(imageData: Data, assets: [CollageAsset]) async {
         guard let wordId = dailyWord?.id else { return }
         do {
