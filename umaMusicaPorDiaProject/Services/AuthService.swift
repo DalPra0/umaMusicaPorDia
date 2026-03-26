@@ -2,7 +2,6 @@ import Foundation
 import Supabase
 import Auth
 
-/// Gerencia a autenticação com o Supabase
 @Observable
 final class AuthService {
     private let client: SupabaseClient

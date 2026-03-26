@@ -7,7 +7,7 @@ struct Collage: Codable, Identifiable {
     let imageUrl: String
     let assetsJson: [CollageAsset]
     let createdAt: Date?
-    
+
     enum CodingKeys: String, CodingKey {
         case id
         case userId = "user_id"
@@ -16,13 +16,4 @@ struct Collage: Codable, Identifiable {
         case assetsJson = "assets_json"
         case createdAt = "created_at"
     }
-}
-
-struct CollageAsset: Codable {
-    let id: String
-    let x: Double
-    let y: Double
-    let scale: Double
-    let rotation: Double
-    let type: String
 }

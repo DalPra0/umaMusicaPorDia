@@ -4,11 +4,9 @@ import Auth
 
 @Observable
 final class CollageViewModel {
-    // Serviços
     private let collageService: CollageService
     private let authService: AuthService
     
-    // Estados da UI
     var items: [CollageItem] = []
     var userAssets: [UserAsset] = []
     var canvasColor: Color = .white
@@ -16,7 +14,6 @@ final class CollageViewModel {
     var isLoadingAssets = false
     var errorMessage: String?
     
-    // Undo / Redo Stacks
     private var undoStack: [[CollageItem]] = []
     private var redoStack: [[CollageItem]] = []
     
@@ -40,25 +37,15 @@ final class CollageViewModel {
     
     @MainActor
     func fetchUserAssets() async {
-        guard let userId = authService.currentUser?.id else {
-            print("DEBUG: fetchUserAssets cancelado - Usuário não logado no app principal")
-            return
-        }
+        guard let userId = authService.currentUser?.id else { return }
         guard !isLoadingAssets else { return }
         
         isLoadingAssets = true
         defer { isLoadingAssets = false }
         
-        print("DEBUG: Buscando assets para o usuário: \(userId.uuidString)")
-        
         do {
             userAssets = try await collageService.fetchUserAssets(userId: userId)
-            print("DEBUG: Busca concluída! Encontrados \(userAssets.count) assets.")
-            for asset in userAssets {
-                print("DEBUG: Asset ID: \(asset.id) | URL: \(asset.imageUrl)")
-            }
         } catch {
-            print("DEBUG: ERRO CRÍTICO ao buscar assets: \(error)")
             self.errorMessage = "Erro ao carregar recortes"
         }
     }
@@ -74,8 +61,6 @@ final class CollageViewModel {
             }
         }
     }
-    
-    // MARK: - Undo / Redo
     
     func saveState() {
         if undoStack.count > 20 { undoStack.removeFirst() }
@@ -94,8 +79,6 @@ final class CollageViewModel {
         undoStack.append(items)
         items = nextState
     }
-    
-    // MARK: - Persistence
     
     func saveCollage(wordId: UUID, imageData: Data, assets: [CollageAsset]) async {
         guard let userId = authService.currentUser?.id else {

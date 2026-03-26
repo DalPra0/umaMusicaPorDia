@@ -16,7 +16,6 @@ struct AuthView: View {
         }
     }
     
-    // MARK: - Landing
     private var landingView: some View {
         VStack(spacing: 0) {
             Spacer()
@@ -42,7 +41,6 @@ struct AuthView: View {
         .padding(30)
     }
     
-    // MARK: - Form
     private var authFormView: some View {
         VStack(spacing: 60) {
             headerWithBack
@@ -78,7 +76,6 @@ struct AuthView: View {
         }
     }
     
-    // MARK: - Subviews
     private var appLogo: some View {
         RoundedRectangle(cornerRadius: 47)
             .fill(Color(hex: "1E1E1E"))

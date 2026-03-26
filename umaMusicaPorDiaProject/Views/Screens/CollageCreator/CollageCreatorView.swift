@@ -5,10 +5,9 @@ struct CollageCreatorView: View {
     @State private var viewModel = CollageViewModel()
     @State private var selectedItems: [PhotosPickerItem] = []
     
-    // UI States
     @State private var showLayers = false
     @State private var showImageSource = false
-    @State private var showPinterestAssets = false // Nova sheet de assets
+    @State private var showPinterestAssets = false
     @State private var showPhotosPicker = false
     
     @State private var renderedImage: UIImage?
@@ -18,39 +17,22 @@ struct CollageCreatorView: View {
     
     @Environment(\.dismiss) var dismiss
 
-    var captureCanvas: some View {
-        ZStack {
-            viewModel.canvasColor
-            
-            ForEach(viewModel.items) { item in
-                Image(uiImage: item.image)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 200)
-                    .rotationEffect(item.rotation)
-                    .scaleEffect(item.scale)
-                    .offset(item.offset)
-            }
-        }
-        .frame(width: 1080/3, height: 1920/3)
-    }
-
     var body: some View {
         ZStack {
             Color(hex: "D9D9D9")
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
-                topBar
+                navigationToolbar
                     .padding(.horizontal, 20)
                     .padding(.top, 10)
                 
-                titleArea
+                wordHeader
                     .padding(.horizontal, 44)
                     .padding(.top, 24)
                     .padding(.bottom, 20)
                 
-                interactiveCanvas
+                mainCanvas
                     .frame(width: 302, height: 536)
                     .clipped()
                     .background(viewModel.canvasColor)
@@ -58,7 +40,7 @@ struct CollageCreatorView: View {
                 
                 Spacer()
                 
-                bottomBar
+                bottomToolbar
                     .padding(.horizontal, 30)
                     .padding(.bottom, 20)
             }
@@ -89,15 +71,15 @@ struct CollageCreatorView: View {
         }
         .sheet(isPresented: $showPinterestAssets) {
             PinterestAssetsSheet(viewModel: viewModel)
-                .presentationDetents([.large]) // Quase tela cheia como no design
+                .presentationDetents([.large])
         }
         .photosPicker(isPresented: $showPhotosPicker, selection: $selectedItems, matching: .images)
         .onChange(of: selectedItems) { _, _ in loadSelectedImages() }
     }
     
-    // MARK: - Subviews
+    // MARK: - Components
     
-    private var topBar: some View {
+    private var navigationToolbar: some View {
         HStack {
             Button(action: { dismiss() }) {
                 Image(systemName: "chevron.left")
@@ -138,7 +120,7 @@ struct CollageCreatorView: View {
         }
     }
     
-    private var titleArea: some View {
+    private var wordHeader: some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("A palavra do dia é:")
                 .font(.system(size: 16))
@@ -153,7 +135,7 @@ struct CollageCreatorView: View {
         }
     }
     
-    private var interactiveCanvas: some View {
+    private var mainCanvas: some View {
         ZStack {
             ForEach($viewModel.items) { $item in
                 CollageItemView(item: $item, onInteractionEnded: { viewModel.saveState() })
@@ -161,23 +143,23 @@ struct CollageCreatorView: View {
         }
     }
     
-    private var bottomBar: some View {
+    private var bottomToolbar: some View {
         HStack {
-            bottomBarButton(title: "Layers", icon: "square.3.layers.3d") {
+            ToolbarButton(title: "Layers", icon: "square.3.layers.3d") {
                 showLayers = true
             }
             
-            bottomBarButton(title: "Images", icon: "photo") {
+            ToolbarButton(title: "Images", icon: "photo") {
                 showImageSource = true
             }
             
-            bottomBarButton(title: "Canvas", icon: "arrow.up.left.and.arrow.down.right") {
+            ToolbarButton(title: "Canvas", icon: "arrow.up.left.and.arrow.down.right") {
                 viewModel.toggleCanvasColor()
             }
         }
     }
     
-    private func bottomBarButton(title: String, icon: String, action: @escaping () -> Void) -> some View {
+    private func ToolbarButton(title: String, icon: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             VStack(spacing: 8) {
                 Image(systemName: icon)
@@ -189,8 +171,6 @@ struct CollageCreatorView: View {
             .frame(maxWidth: .infinity)
         }
     }
-    
-    // MARK: - Logic
     
     private func loadSelectedImages() {
         for item in selectedItems {
@@ -206,7 +186,7 @@ struct CollageCreatorView: View {
     
     @MainActor
     private func prepareExport() {
-        let renderer = ImageRenderer(content: captureCanvas)
+        let renderer = ImageRenderer(content: CollageCanvasView(viewModel: viewModel))
         renderer.scale = 3.0
         
         if let uiImage = renderer.uiImage,
@@ -224,90 +204,5 @@ struct CollageCreatorView: View {
                 navigateToExport = true
             }
         }
-    }
-}
-
-// MARK: - Subcomponentes
-
-struct LayersSheet: View {
-    @Binding var items: [CollageItem]
-    var onSaveState: () -> Void
-    
-    var body: some View {
-        NavigationStack {
-            List {
-                ForEach(items.reversed()) { item in
-                    HStack {
-                        Image(uiImage: item.image)
-                            .resizable()
-                            .scaledToFill()
-                            .frame(width: 40, height: 40)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                        Text("Imagem")
-                            .font(.subheadline)
-                    }
-                }
-                .onMove { source, destination in
-                    onSaveState()
-                    var reversedItems = Array(items.reversed())
-                    reversedItems.move(fromOffsets: source, toOffset: destination)
-                    items = Array(reversedItems.reversed())
-                }
-                .onDelete { indexSet in
-                    onSaveState()
-                    var reversedItems = Array(items.reversed())
-                    reversedItems.remove(atOffsets: indexSet)
-                    items = Array(reversedItems.reversed())
-                }
-            }
-            .navigationTitle("Camadas")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                EditButton()
-            }
-        }
-    }
-}
-
-struct CollageItemView: View {
-    @Binding var item: CollageItem
-    var onInteractionEnded: () -> Void
-    
-    var body: some View {
-        Image(uiImage: item.image)
-            .resizable()
-            .scaledToFit()
-            .frame(width: 200)
-            .rotationEffect(item.rotation)
-            .scaleEffect(item.scale)
-            .offset(item.offset)
-            .gesture(
-                DragGesture()
-                    .onChanged { value in
-                        item.offset = CGSize(
-                            width: item.lastOffset.width + value.translation.width,
-                            height: item.lastOffset.height + value.translation.height
-                        )
-                    }
-                    .onEnded { _ in
-                        item.lastOffset = item.offset
-                        onInteractionEnded()
-                    }
-            )
-            .gesture(
-                MagnificationGesture()
-                    .onChanged { value in item.scale = item.lastScale * value }
-                    .onEnded { _ in
-                        item.lastScale = item.scale
-                        onInteractionEnded()
-                    }
-                    .simultaneously(with: RotationGesture()
-                        .onChanged { value in item.rotation = item.lastRotation + value }
-                        .onEnded { _ in
-                            item.lastRotation = item.rotation
-                            onInteractionEnded()
-                        }
-                    )
-            )
     }
 }

@@ -12,7 +12,7 @@ struct ExportView: View {
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
-                header
+                headerToolbar
                     .padding(.horizontal, 16)
                     .padding(.top, 10)
                 
@@ -22,7 +22,9 @@ struct ExportView: View {
                 
                 Spacer()
                 
-                divider
+                Divider()
+                    .padding(.horizontal, 20)
+                    .padding(.bottom, 30)
                 
                 exportOptions
                     .padding(.bottom, 40)
@@ -35,9 +37,7 @@ struct ExportView: View {
         .navigationBarHidden(true)
     }
     
-    // MARK: - Subviews
-    
-    private var header: some View {
+    private var headerToolbar: some View {
         HStack {
             Button(action: { dismiss() }) {
                 Image(systemName: "chevron.left")
@@ -53,7 +53,6 @@ struct ExportView: View {
             
             Spacer()
             
-            // Equilíbrio visual
             Image(systemName: "chevron.left").opacity(0)
         }
     }
@@ -65,14 +64,6 @@ struct ExportView: View {
             .frame(width: 302, height: 536)
             .cornerRadius(13)
             .shadow(color: .black.opacity(0.1), radius: 10)
-    }
-    
-    private var divider: some View {
-        Rectangle()
-            .fill(Color.gray.opacity(0.3))
-            .frame(height: 1)
-            .padding(.horizontal, 20)
-            .padding(.bottom, 30)
     }
     
     private var exportOptions: some View {
@@ -117,8 +108,6 @@ struct ExportView: View {
                 }
             }
     }
-    
-    // MARK: - Actions
     
     private func saveToPhotos() {
         PHPhotoLibrary.requestAuthorization(for: .addOnly) { status in

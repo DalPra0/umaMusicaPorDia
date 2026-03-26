@@ -1,7 +1,6 @@
 import Foundation
 import Supabase
 
-/// Busca e gerencia as palavras do dia
 @Observable
 final class WordService {
     private let client: SupabaseClient
