@@ -10,7 +10,6 @@ Deno.serve(async (req) => {
       throw new Error("Faltam variáveis de ambiente!")
     }
 
-    // 1. Chamar o Gemini
     const prompt = "Gere uma única palavra em português que seja inspiradora e relacionada ao universo da música (ex: Melodia, Ritmo, Saudade). Responda apenas com a palavra, sem pontuação."
     
     const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_API_KEY}`, {
@@ -24,10 +23,8 @@ Deno.serve(async (req) => {
     const data = await response.json()
     const aiWord = data.candidates[0].content.parts[0].text.trim()
 
-    // 2. Conectar ao Supabase (usando a service role para ignorar RLS no servidor)
     const supabase = createClient(SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY)
 
-    // 3. Inserir na tabela
     const { error } = await supabase
       .from('daily_words')
       .insert({ 
@@ -36,7 +33,6 @@ Deno.serve(async (req) => {
       })
 
     if (error) {
-      // Se já existir palavra pro dia, apenas retorna a que existe ou ignora
       console.log("Aviso ou Erro ao inserir:", error.message)
     }
 

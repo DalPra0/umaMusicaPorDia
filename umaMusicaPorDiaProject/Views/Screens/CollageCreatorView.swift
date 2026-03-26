@@ -1,62 +1,28 @@
 import SwiftUI
 import PhotosUI
 
-// MARK: - Modelos e Helpers
-
-struct CollageItem: Identifiable, Equatable {
-    let id: UUID
-    var image: UIImage
-    var offset: CGSize
-    var lastOffset: CGSize
-    var scale: CGFloat
-    var lastScale: CGFloat
-    var rotation: Angle
-    var lastRotation: Angle
-    
-    init(id: UUID = UUID(), image: UIImage, offset: CGSize = .zero, lastOffset: CGSize = .zero, scale: CGFloat = 1.0, lastScale: CGFloat = 1.0, rotation: Angle = .zero, lastRotation: Angle = .zero) {
-        self.id = id
-        self.image = image
-        self.offset = offset
-        self.lastOffset = lastOffset
-        self.scale = scale
-        self.lastScale = lastScale
-        self.rotation = rotation
-        self.lastRotation = lastRotation
-    }
-    
-    static func == (lhs: CollageItem, rhs: CollageItem) -> Bool {
-        lhs.id == rhs.id &&
-        lhs.offset == rhs.offset &&
-        lhs.scale == rhs.scale &&
-        lhs.rotation == rhs.rotation
-    }
-}
-
-// MARK: - View Principal
-
 struct CollageCreatorView: View {
-    @StateObject private var viewModel = MusicViewModel()
-    @State private var items: [CollageItem] = []
+    @State private var viewModel = CollageViewModel()
     @State private var selectedItems: [PhotosPickerItem] = []
     
-    @State private var canvasColor: Color = .white
-    @State private var undoStack: [[CollageItem]] = []
-    @State private var redoStack: [[CollageItem]] = []
-    
+    // UI States
     @State private var showLayers = false
-    @State private var isSaving = false
+    @State private var showImageSource = false
+    @State private var showPinterestAssets = false // Nova sheet de assets
+    @State private var showPhotosPicker = false
     
-    // Navegação para Exportação
     @State private var renderedImage: UIImage?
     @State private var navigateToExport = false
+    
+    @State private var homeViewModel = HomeViewModel()
     
     @Environment(\.dismiss) var dismiss
 
     var captureCanvas: some View {
         ZStack {
-            canvasColor
+            viewModel.canvasColor
             
-            ForEach(items) { item in
+            ForEach(viewModel.items) { item in
                 Image(uiImage: item.image)
                     .resizable()
                     .scaledToFit()
@@ -87,7 +53,7 @@ struct CollageCreatorView: View {
                 interactiveCanvas
                     .frame(width: 302, height: 536)
                     .clipped()
-                    .background(canvasColor)
+                    .background(viewModel.canvasColor)
                     .shadow(color: .black.opacity(0.1), radius: 10)
                 
                 Spacer()
@@ -97,19 +63,39 @@ struct CollageCreatorView: View {
                     .padding(.bottom, 20)
             }
         }
+        .navigationBarHidden(true)
         .navigationDestination(isPresented: $navigateToExport) {
             if let image = renderedImage {
                 ExportView(renderedImage: image)
             }
         }
-        .navigationBarHidden(true)
-        .onAppear { viewModel.loadInitialData() }
-        .onChange(of: selectedItems) { _, _ in loadSelectedImages() }
         .sheet(isPresented: $showLayers) {
-            LayersSheet(items: $items, onSaveState: saveState)
+            LayersSheet(items: $viewModel.items, onSaveState: { viewModel.saveState() })
                 .presentationDetents([.medium])
         }
+        .sheet(isPresented: $showImageSource) {
+            ImageSourceSheet(
+                onSelectPhotos: {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        showPhotosPicker = true
+                    }
+                },
+                onSelectPinterest: {
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        showPinterestAssets = true
+                    }
+                }
+            )
+        }
+        .sheet(isPresented: $showPinterestAssets) {
+            PinterestAssetsSheet(viewModel: viewModel)
+                .presentationDetents([.large]) // Quase tela cheia como no design
+        }
+        .photosPicker(isPresented: $showPhotosPicker, selection: $selectedItems, matching: .images)
+        .onChange(of: selectedItems) { _, _ in loadSelectedImages() }
     }
+    
+    // MARK: - Subviews
     
     private var topBar: some View {
         HStack {
@@ -122,25 +108,25 @@ struct CollageCreatorView: View {
             Spacer()
             
             HStack(spacing: 20) {
-                Button(action: undo) {
+                Button(action: { viewModel.undo() }) {
                     Image(systemName: "arrow.uturn.backward.circle")
                         .font(.system(size: 24))
-                        .foregroundColor(undoStack.isEmpty ? .gray : .black)
+                        .foregroundColor(viewModel.canUndo ? .black : .gray)
                 }
-                .disabled(undoStack.isEmpty)
+                .disabled(!viewModel.canUndo)
                 
-                Button(action: redo) {
+                Button(action: { viewModel.redo() }) {
                     Image(systemName: "arrow.uturn.forward.circle")
                         .font(.system(size: 24))
-                        .foregroundColor(redoStack.isEmpty ? .gray : .black)
+                        .foregroundColor(viewModel.canRedo ? .black : .gray)
                 }
-                .disabled(redoStack.isEmpty)
+                .disabled(!viewModel.canRedo)
             }
             
             Spacer()
             
             Button(action: prepareExport) {
-                if isSaving {
+                if viewModel.isSaving {
                     ProgressView()
                 } else {
                     Image(systemName: "square.and.arrow.up")
@@ -148,7 +134,7 @@ struct CollageCreatorView: View {
                         .foregroundColor(.black)
                 }
             }
-            .disabled(isSaving || items.isEmpty)
+            .disabled(viewModel.isSaving || viewModel.items.isEmpty)
         }
     }
     
@@ -160,138 +146,66 @@ struct CollageCreatorView: View {
                 .tracking(-0.31)
                 .frame(maxWidth: .infinity, alignment: .leading)
             
-            if let word = viewModel.dailyWord {
-                Text(word.word.uppercased())
-                    .font(.system(size: 34, weight: .bold))
-                    .foregroundColor(Color(hex: "4A4242"))
-                    .tracking(0.4)
-            } else {
-                Text("CARREGANDO...")
-                    .font(.system(size: 34, weight: .bold))
-                    .foregroundColor(.gray)
-            }
+            Text(homeViewModel.dailyWord?.word.uppercased() ?? "CARREGANDO...")
+                .font(.system(size: 34, weight: .bold))
+                .foregroundColor(Color(hex: "4A4242"))
+                .tracking(0.4)
         }
     }
     
     private var interactiveCanvas: some View {
         ZStack {
-            ForEach($items) { $item in
-                Image(uiImage: item.image)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 200)
-                    .rotationEffect(item.rotation)
-                    .scaleEffect(item.scale)
-                    .offset(item.offset)
-                    .gesture(
-                        DragGesture()
-                            .onChanged { value in
-                                item.offset = CGSize(
-                                    width: item.lastOffset.width + value.translation.width,
-                                    height: item.lastOffset.height + value.translation.height
-                                )
-                            }
-                            .onEnded { _ in
-                                item.lastOffset = item.offset
-                                saveState()
-                            }
-                    )
-                    .gesture(
-                        MagnificationGesture()
-                            .onChanged { value in item.scale = item.lastScale * value }
-                            .onEnded { _ in
-                                item.lastScale = item.scale
-                                saveState()
-                            }
-                            .simultaneously(with: RotationGesture()
-                                .onChanged { value in item.rotation = item.lastRotation + value }
-                                .onEnded { _ in
-                                    item.lastRotation = item.rotation
-                                    saveState()
-                                }
-                            )
-                    )
+            ForEach($viewModel.items) { $item in
+                CollageItemView(item: $item, onInteractionEnded: { viewModel.saveState() })
             }
         }
     }
     
     private var bottomBar: some View {
         HStack {
-            Button(action: { showLayers = true }) {
-                VStack(spacing: 8) {
-                    Image(systemName: "square.3.layers.3d")
-                        .font(.system(size: 24))
-                    Text("Layers")
-                        .font(.system(size: 10, weight: .medium))
-                }
-                .foregroundColor(.black)
-                .frame(maxWidth: .infinity)
+            bottomBarButton(title: "Layers", icon: "square.3.layers.3d") {
+                showLayers = true
             }
             
-            PhotosPicker(selection: $selectedItems, matching: .images) {
-                VStack(spacing: 8) {
-                    Image(systemName: "photo")
-                        .font(.system(size: 24))
-                    Text("Images")
-                        .font(.system(size: 10, weight: .medium))
-                }
-                .foregroundColor(.black)
-                .frame(maxWidth: .infinity)
+            bottomBarButton(title: "Images", icon: "photo") {
+                showImageSource = true
             }
             
-            Button(action: {
-                saveState()
-                canvasColor = canvasColor == .white ? Color(hex: "F0F0F0") : .white
-            }) {
-                VStack(spacing: 8) {
-                    Image(systemName: "arrow.up.left.and.arrow.down.right")
-                        .font(.system(size: 24))
-                    Text("Canvas")
-                        .font(.system(size: 10, weight: .medium))
-                }
-                .foregroundColor(.black)
-                .frame(maxWidth: .infinity)
+            bottomBarButton(title: "Canvas", icon: "arrow.up.left.and.arrow.down.right") {
+                viewModel.toggleCanvasColor()
             }
         }
     }
     
-    func loadSelectedImages() {
+    private func bottomBarButton(title: String, icon: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            VStack(spacing: 8) {
+                Image(systemName: icon)
+                    .font(.system(size: 24))
+                Text(title)
+                    .font(.system(size: 10, weight: .medium))
+            }
+            .foregroundColor(.black)
+            .frame(maxWidth: .infinity)
+        }
+    }
+    
+    // MARK: - Logic
+    
+    private func loadSelectedImages() {
         for item in selectedItems {
             Task {
                 if let data = try? await item.loadTransferable(type: Data.self),
                    let uiImage = UIImage(data: data) {
-                    await MainActor.run {
-                        saveState()
-                        items.append(CollageItem(image: uiImage))
-                    }
+                    await MainActor.run { viewModel.addItem(uiImage) }
                 }
             }
         }
         selectedItems = []
     }
     
-    private func saveState() {
-        if undoStack.count > 20 { undoStack.removeFirst() }
-        undoStack.append(items)
-        redoStack.removeAll()
-    }
-    
-    private func undo() {
-        guard let lastState = undoStack.popLast() else { return }
-        redoStack.append(items)
-        items = lastState
-    }
-    
-    private func redo() {
-        guard let nextState = redoStack.popLast() else { return }
-        undoStack.append(items)
-        items = nextState
-    }
-    
     @MainActor
-    func prepareExport() {
-        isSaving = true
-        
+    private func prepareExport() {
         let renderer = ImageRenderer(content: captureCanvas)
         renderer.scale = 3.0
         
@@ -300,28 +214,27 @@ struct CollageCreatorView: View {
             
             self.renderedImage = uiImage
             
-            let assets = items.map { item in
+            let assets = viewModel.items.map { item in
                 CollageAsset(id: item.id.uuidString, x: Double(item.offset.width), y: Double(item.offset.height),
                              scale: Double(item.scale), rotation: item.rotation.degrees, type: "image")
             }
             
             Task {
-                await viewModel.saveUserCollage(imageData: imageData, assets: assets)
-                isSaving = false
-                navigateToExport = true // Navega para a nova tela
+                await viewModel.saveCollage(wordId: homeViewModel.dailyWord?.id ?? UUID(), imageData: imageData, assets: assets)
+                navigateToExport = true
             }
-        } else {
-            isSaving = false
         }
     }
 }
+
+// MARK: - Subcomponentes
 
 struct LayersSheet: View {
     @Binding var items: [CollageItem]
     var onSaveState: () -> Void
     
     var body: some View {
-        NavigationView {
+        NavigationStack {
             List {
                 ForEach(items.reversed()) { item in
                     HStack {
@@ -349,7 +262,52 @@ struct LayersSheet: View {
             }
             .navigationTitle("Camadas")
             .navigationBarTitleDisplayMode(.inline)
-            .toolbar { EditButton() }
+            .toolbar {
+                EditButton()
+            }
         }
+    }
+}
+
+struct CollageItemView: View {
+    @Binding var item: CollageItem
+    var onInteractionEnded: () -> Void
+    
+    var body: some View {
+        Image(uiImage: item.image)
+            .resizable()
+            .scaledToFit()
+            .frame(width: 200)
+            .rotationEffect(item.rotation)
+            .scaleEffect(item.scale)
+            .offset(item.offset)
+            .gesture(
+                DragGesture()
+                    .onChanged { value in
+                        item.offset = CGSize(
+                            width: item.lastOffset.width + value.translation.width,
+                            height: item.lastOffset.height + value.translation.height
+                        )
+                    }
+                    .onEnded { _ in
+                        item.lastOffset = item.offset
+                        onInteractionEnded()
+                    }
+            )
+            .gesture(
+                MagnificationGesture()
+                    .onChanged { value in item.scale = item.lastScale * value }
+                    .onEnded { _ in
+                        item.lastScale = item.scale
+                        onInteractionEnded()
+                    }
+                    .simultaneously(with: RotationGesture()
+                        .onChanged { value in item.rotation = item.lastRotation + value }
+                        .onEnded { _ in
+                            item.lastRotation = item.rotation
+                            onInteractionEnded()
+                        }
+                    )
+            )
     }
 }

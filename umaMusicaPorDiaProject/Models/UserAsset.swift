@@ -2,9 +2,9 @@ import Foundation
 
 struct UserAsset: Codable, Identifiable {
     let id: UUID
-    let userId: UUID
+    let userId: String // Mudado para String pois o banco pode retornar fallback UUID ou ID real
     let imageUrl: String
-    let createdAt: Date
+    let createdAt: String
     
     enum CodingKeys: String, CodingKey {
         case id

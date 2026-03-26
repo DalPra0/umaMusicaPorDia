@@ -15,9 +15,12 @@ struct umaMusicaPorDiaProjectApp: App {
                 }
             }
             .task {
-                // Escutar mudanças no estado de autenticação
-                for await state in SupabaseService.shared.client.auth.authStateChanges {
-                    isAuthenticated = (state.session != nil)
+                // Escuta mudanças de estado de autenticação globalmente
+                let authChanges = SupabaseService.shared.client.auth.authStateChanges
+                for await state in authChanges {
+                    withAnimation {
+                        isAuthenticated = (state.session != nil)
+                    }
                 }
             }
         }

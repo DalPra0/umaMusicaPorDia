@@ -65,6 +65,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		157047E32F748010008D75D2 /* Exceptions for "umaMusicaPorDiaProject" folder in "ShareNostalgia" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Utils/SharedSupabaseClient.swift,
+			);
+			target = 158E221A2F6DE129003D863A /* ShareNostalgia */;
+		};
 		157E31352F64980E0041B4EE /* Exceptions for "musicaDoDiaWidget" folder in "musicaDoDiaWidgetExtension" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
@@ -84,6 +91,9 @@
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		154A091D2F6349BB004F831C /* umaMusicaPorDiaProject */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				157047E32F748010008D75D2 /* Exceptions for "umaMusicaPorDiaProject" folder in "ShareNostalgia" target */,
+			);
 			path = umaMusicaPorDiaProject;
 			sourceTree = "<group>";
 		};

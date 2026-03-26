@@ -12,50 +12,30 @@ struct ExportView: View {
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
-                // 1. Header
                 header
                     .padding(.horizontal, 16)
                     .padding(.top, 10)
                 
                 Spacer()
                 
-                // 2. Preview da Colagem
-                Image(uiImage: renderedImage)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 302, height: 536)
-                    .cornerRadius(13)
-                    .shadow(color: .black.opacity(0.1), radius: 10)
+                previewArea
                 
                 Spacer()
                 
-                // 3. Divider
-                Rectangle()
-                    .fill(Color.gray.opacity(0.3))
-                    .frame(height: 1)
-                    .padding(.horizontal, 20)
-                    .padding(.bottom, 30)
+                divider
                 
-                // 4. Botões de Exportação
-                exportButtons
+                exportOptions
                     .padding(.bottom, 40)
             }
             
-            // Toast de Sucesso
             if showSuccessMessage {
-                VStack {
-                    Text("Salvo na Galeria!")
-                        .font(.headline)
-                        .foregroundColor(.white)
-                        .padding()
-                        .background(Color.black.opacity(0.7))
-                        .cornerRadius(10)
-                }
-                .transition(.move(edge: .bottom).combined(with: .opacity))
+                successToast
             }
         }
         .navigationBarHidden(true)
     }
+    
+    // MARK: - Subviews
     
     private var header: some View {
         HStack {
@@ -73,82 +53,85 @@ struct ExportView: View {
             
             Spacer()
             
-            // Placeholder para manter o título centralizado
-            Image(systemName: "chevron.left")
-                .opacity(0)
+            // Equilíbrio visual
+            Image(systemName: "chevron.left").opacity(0)
         }
     }
     
-    private var exportButtons: some View {
+    private var previewArea: some View {
+        Image(uiImage: renderedImage)
+            .resizable()
+            .scaledToFit()
+            .frame(width: 302, height: 536)
+            .cornerRadius(13)
+            .shadow(color: .black.opacity(0.1), radius: 10)
+    }
+    
+    private var divider: some View {
+        Rectangle()
+            .fill(Color.gray.opacity(0.3))
+            .frame(height: 1)
+            .padding(.horizontal, 20)
+            .padding(.bottom, 30)
+    }
+    
+    private var exportOptions: some View {
         HStack(spacing: 40) {
-            // Botão Salvar
-            Button(action: saveToPhotos) {
-                exportButtonContent(iconName: "square.and.arrow.down")
-            }
-            
-            // Botão Instagram
-            Button(action: { shareToSocial(platform: "instagram") }) {
-                exportButtonContent(imageName: "instagram_icon") // Assumindo que você terá esses assets ou usaremos placeholders
-                    .overlay(
-                        // Fallback caso não tenha a imagem: círculo estilo Instagram
-                        Image(systemName: "camera.circle")
-                            .font(.system(size: 30))
-                            .foregroundColor(.black)
-                    )
-            }
-            
-            // Botão TikTok
-            Button(action: { shareToSocial(platform: "tiktok") }) {
-                exportButtonContent(imageName: "tiktok_icon")
-                    .overlay(
-                        Image(systemName: "music.note.list")
-                            .font(.system(size: 26))
-                            .foregroundColor(.black)
-                    )
-            }
+            exportButton(icon: "square.and.arrow.down", action: saveToPhotos)
+            exportButton(systemIcon: "camera.circle", action: { share(platform: "instagram") })
+            exportButton(systemIcon: "music.note.list", action: { share(platform: "tiktok") })
         }
     }
     
-    private func exportButtonContent(iconName: String? = nil, imageName: String? = nil) -> some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 7)
-                .fill(Color.white)
-                .frame(width: 53, height: 53)
-            
-            if let icon = iconName {
-                Image(systemName: icon)
-                    .font(.system(size: 28))
-                    .foregroundColor(.black)
-            }
-        }
-    }
-    
-    // MARK: - Ações
-    
-    private func saveToPhotos() {
-        PHPhotoLibrary.requestAuthorization(for: .addOnly) { status in
-            DispatchQueue.main.async {
-                switch status {
-                case .authorized, .limited:
-                    UIImageWriteToSavedPhotosAlbum(renderedImage, nil, nil, nil)
-                    withAnimation {
-                        showSuccessMessage = true
-                    }
-                    DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                        withAnimation { showSuccessMessage = false }
-                    }
-                case .denied, .restricted:
-                    // Aqui você poderia mostrar um alerta pedindo pro usuário ir nas Configurações
-                    print("Acesso à Galeria negado.")
-                default:
-                    break
+    private func exportButton(icon: String? = nil, systemIcon: String? = nil, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 7)
+                    .fill(Color.white)
+                    .frame(width: 53, height: 53)
+                
+                if let icon = icon {
+                    Image(systemName: icon)
+                        .font(.system(size: 28))
+                        .foregroundColor(.black)
+                } else if let systemIcon = systemIcon {
+                    Image(systemName: systemIcon)
+                        .font(.system(size: 28))
+                        .foregroundColor(.black)
                 }
             }
         }
     }
     
-    private func shareToSocial(platform: String) {
-        // Aqui abriria a ShareSheet nativa focada na plataforma ou usando SDKs
+    private var successToast: some View {
+        Text("Salvo na Galeria!")
+            .font(.headline)
+            .foregroundColor(.white)
+            .padding()
+            .background(Color.black.opacity(0.7))
+            .cornerRadius(10)
+            .transition(.move(edge: .bottom).combined(with: .opacity))
+            .onAppear {
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                    withAnimation { showSuccessMessage = false }
+                }
+            }
+    }
+    
+    // MARK: - Actions
+    
+    private func saveToPhotos() {
+        PHPhotoLibrary.requestAuthorization(for: .addOnly) { status in
+            guard status == .authorized || status == .limited else { return }
+            
+            DispatchQueue.main.async {
+                UIImageWriteToSavedPhotosAlbum(renderedImage, nil, nil, nil)
+                withAnimation { showSuccessMessage = true }
+            }
+        }
+    }
+    
+    private func share(platform: String) {
         let activityVC = UIActivityViewController(activityItems: [renderedImage], applicationActivities: nil)
         if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene,
            let rootVC = windowScene.windows.first?.rootViewController {

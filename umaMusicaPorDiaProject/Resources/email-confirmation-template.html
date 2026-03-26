@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirme seu email</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+            background-color: #fafafa;
+            padding: 32px 16px;
+            line-height: 1.5;
+            color: #1a1a1a;
+        }
+        
+        .email-container {
+            max-width: 560px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            border: 1px solid #e5e5e5;
+        }
+        
+        .email-header {
+            padding: 32px 32px 24px;
+            border-bottom: 1px solid #e5e5e5;
+        }
+        
+        .logo {
+            font-size: 20px;
+            font-weight: 600;
+            color: #1a1a1a;
+            letter-spacing: -0.3px;
+            margin-bottom: 4px;
+        }
+        
+        .tagline {
+            font-size: 14px;
+            color: #666666;
+            font-weight: 400;
+        }
+        
+        .email-body {
+            padding: 32px;
+        }
+        
+        .email-body h1 {
+            font-size: 24px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 16px;
+            letter-spacing: -0.4px;
+        }
+        
+        .email-body p {
+            font-size: 15px;
+            color: #4a4a4a;
+            margin-bottom: 16px;
+            line-height: 1.6;
+        }
+        
+        .button-container {
+            margin: 32px 0;
+        }
+        
+        .confirm-button {
+            display: inline-block;
+            padding: 12px 32px;
+            background-color: #1a1a1a;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 500;
+            letter-spacing: -0.2px;
+        }
+        
+        .confirm-button:hover {
+            background-color: #333333;
+        }
+        
+        .security-note {
+            margin-top: 32px;
+            padding: 16px;
+            background-color: #f7f7f7;
+            border-radius: 6px;
+            border-left: 3px solid #1a1a1a;
+        }
+        
+        .security-note p {
+            font-size: 13px;
+            color: #666666;
+            margin-bottom: 0;
+        }
+        
+        .link-fallback {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid #e5e5e5;
+        }
+        
+        .link-fallback p {
+            font-size: 13px;
+            color: #999999;
+            margin-bottom: 8px;
+        }
+        
+        .link-fallback a {
+            font-size: 13px;
+            color: #666666;
+            word-break: break-all;
+            text-decoration: none;
+        }
+        
+        .link-fallback a:hover {
+            color: #1a1a1a;
+        }
+        
+        .email-footer {
+            padding: 24px 32px;
+            background-color: #fafafa;
+            border-top: 1px solid #e5e5e5;
+            border-radius: 0 0 8px 8px;
+        }
+        
+        .email-footer p {
+            font-size: 13px;
+            color: #999999;
+            text-align: center;
+            line-height: 1.5;
+            margin: 0;
+        }
+        
+        @media only screen and (max-width: 600px) {
+            body {
+                padding: 16px 12px;
+            }
+            
+            .email-header,
+            .email-body,
+            .email-footer {
+                padding: 24px 20px;
+            }
+            
+            .email-body h1 {
+                font-size: 22px;
+            }
+            
+            .confirm-button {
+                display: block;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="email-container">
+        <!-- Header -->
+        <div class="email-header">
+            <div class="logo">Uma Música Por Dia</div>
+            <div class="tagline">Sua jornada criativa começa aqui</div>
+        </div>
+        
+        <!-- Body -->
+        <div class="email-body">
+            <h1>Confirme seu endereço de email</h1>
+            
+            <p>
+                Para começar a criar suas colagens e salvar seus recortes do Pinterest, 
+                precisamos verificar que este endereço de email pertence a você.
+            </p>
+            
+            <div class="button-container">
+                <a href="{{ .ConfirmationURL }}" class="confirm-button">Confirmar email</a>
+            </div>
+            
+            <div class="security-note">
+                <p>
+                    Este link de confirmação expira em 24 horas por razões de segurança.
+                </p>
+            </div>
+            
+            <div class="link-fallback">
+                <p>Se o botão não funcionar, copie e cole este link no navegador:</p>
+                <a href="{{ .ConfirmationURL }}">{{ .ConfirmationURL }}</a>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="email-footer">
+            <p>
+                Se você não criou esta conta, pode ignorar este email.<br>
+                Nenhuma ação adicional será necessária.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
