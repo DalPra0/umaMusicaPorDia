@@ -2,10 +2,8 @@ import SwiftUI
 
 @Observable
 final class AuthViewModel {
-    // Serviços
     private let authService: AuthService
     
-    // Estados do Formulário
     var email = ""
     var password = ""
     var username = ""

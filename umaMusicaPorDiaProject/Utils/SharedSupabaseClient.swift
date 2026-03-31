@@ -1,8 +1,7 @@
 import Foundation
 import Supabase
 
-/// Cliente Supabase compartilhado entre o app principal e extensões
-/// Usa App Groups + Keychain para compartilhar a sessão de autenticação
+
 final class SharedSupabaseClient {
     static let shared = SharedSupabaseClient()
     
@@ -11,7 +10,6 @@ final class SharedSupabaseClient {
     let client: SupabaseClient
     
     private init() {
-        // Configurar armazenamento usando App Groups
         let groupURL = FileManager.default.containerURL(
             forSecurityApplicationGroupIdentifier: appGroupID
         )!
@@ -32,7 +30,6 @@ final class SharedSupabaseClient {
     }
 }
 
-/// Armazena sessão no App Group para compartilhar entre app e extensões
 final class AppGroupSessionStorage: AuthLocalStorage {
     private let groupURL: URL
     

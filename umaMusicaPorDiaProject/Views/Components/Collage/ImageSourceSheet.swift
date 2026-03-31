@@ -7,13 +7,11 @@ struct ImageSourceSheet: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Grabber
             RoundedRectangle(cornerRadius: 2.5)
                 .fill(Color.gray.opacity(0.4))
                 .frame(width: 36, height: 5)
                 .padding(.top, 6)
             
-            // Header
             HStack {
                 Text("Images")
                     .font(.system(size: 20, weight: .semibold))
@@ -32,9 +30,7 @@ struct ImageSourceSheet: View {
             .padding(.top, 14)
             .padding(.bottom, 30)
             
-            // Options
             HStack(spacing: 60) {
-                // Photos Button
                 VStack(spacing: 8) {
                     Button(action: {
                         dismiss()
@@ -50,14 +46,12 @@ struct ImageSourceSheet: View {
                         .font(.system(size: 13, weight: .medium))
                 }
                 
-                // Pinterest Button
                 VStack(spacing: 8) {
                     Button(action: {
                         dismiss()
                         onSelectPinterest()
                     }) {
                         sourceIconBackground {
-                            // Usando um fallback visual para o logo do Pinterest caso não tenha asset
                             Image(systemName: "p.circle.fill")
                                 .font(.system(size: 50))
                                 .foregroundColor(.black)
@@ -72,7 +66,7 @@ struct ImageSourceSheet: View {
             Spacer()
         }
         .presentationDetents([.height(250)])
-        .presentationDragIndicator(.hidden) // Já fizemos o nosso customizado
+        .presentationDragIndicator(.hidden)
     }
     
     private func sourceIconBackground<Content: View>(@ViewBuilder content: () -> Content) -> some View {

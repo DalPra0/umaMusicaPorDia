@@ -24,7 +24,6 @@ struct umaMusicaPorDiaProjectApp: App {
             .animation(.easeInOut, value: isAuthenticated)
             .animation(.easeInOut, value: hasCompletedOnboarding)
             .task {
-                // Escuta mudanças de estado de autenticação globalmente
                 let authChanges = SupabaseService.shared.client.auth.authStateChanges
                 for await state in authChanges {
                     withAnimation {

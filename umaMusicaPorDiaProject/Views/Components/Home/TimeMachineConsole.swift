@@ -16,6 +16,10 @@ struct TimeMachineConsole: View {
                 .font(.system(size: 34, weight: .bold))
                 .foregroundColor(.white)
                 .tracking(0.4)
+                .multilineTextAlignment(.center)
+                .lineLimit(2)
+                .minimumScaleFactor(0.5)
+                .frame(width: 300)
                 .offset(y: 110)
             
             MachineLever(pullAmount: viewModel.leverPull)

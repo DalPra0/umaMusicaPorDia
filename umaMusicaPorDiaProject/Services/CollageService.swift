@@ -13,11 +13,19 @@ final class CollageService {
         let fileName = "\(userId.uuidString)/\(UUID().uuidString).jpg"
         
         try await client.storage
-            .from("user_collages")
-            .upload(fileName, data: imageData, options: FileOptions(contentType: "image/jpeg"))
+            .from("collages")
+            .upload(
+                fileName,
+                data: imageData,
+                options: FileOptions(
+                    cacheControl: "31536000",
+                    contentType: "image/jpeg",
+                    upsert: false
+                )
+            )
             
         let imageUrl = try client.storage
-            .from("user_collages")
+            .from("collages")
             .getPublicURL(path: fileName)
             .absoluteString
             
@@ -31,7 +39,7 @@ final class CollageService {
         )
         
         try await client
-            .from("user_collages")
+            .from("collages")
             .insert(collage)
             .execute()
     }

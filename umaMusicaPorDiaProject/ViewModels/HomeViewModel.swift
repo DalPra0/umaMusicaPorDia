@@ -3,11 +3,9 @@ import Auth
 
 @Observable
 final class HomeViewModel {
-    // Serviços
     private let wordService: WordService
     private let authService: AuthService
     
-    // Estados da UI (State-as-Bridge)
     var dailyWord: DailyWord?
     var username: String = "Usuário"
     var isSpinning = false
@@ -15,7 +13,6 @@ final class HomeViewModel {
     var leverPull: CGFloat = 0
     var errorMessage: String?
     
-    // Dados Fixos
     let placeholderWords = ["INFÂNCIA", "AMOR", "VIAGEM", "SONHO", "FESTA", "VERÃO", "AMIGOS", "NOSTALGIA"]
     private let itemHeight: CGFloat = 80
     
@@ -62,13 +59,11 @@ final class HomeViewModel {
     func spin() {
         guard !isSpinning else { return }
         
-        // 1. Inicia animação da alavanca (Síncrono para UI)
         withAnimation(.spring(response: 0.5, dampingFraction: 0.5)) {
             leverPull = 50
             isSpinning = true
         }
         
-        // 2. Dispara a lógica de rotação
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.4) {
             withAnimation(.spring(response: 0.5, dampingFraction: 0.5)) {
                 self.leverPull = 0
@@ -90,7 +85,6 @@ final class HomeViewModel {
                 self.isSpinning = false
             }
         } else {
-            // Spin infinito enquanto carrega
             withAnimation(.linear(duration: 1.0).repeatForever(autoreverses: false)) {
                 wordsOffset = -(CGFloat(placeholderWords.count - 1) * itemHeight)
             }

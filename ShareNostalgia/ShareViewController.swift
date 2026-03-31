@@ -6,7 +6,6 @@ import Supabase
 
 class ShareViewController: UIViewController {
     
-    // Usa cliente compartilhado para ter acesso à mesma sessão do app principal
     let supabase = SharedSupabaseClient.shared.client
 
     private let statusLabel = UILabel()
@@ -32,7 +31,6 @@ class ShareViewController: UIViewController {
         statusLabel.text = "Iniciando importação..."
         view.addSubview(statusLabel)
         
-        // Botão de fechar caso trave
         let closeButton = UIButton(type: .system)
         closeButton.setTitle("Cancelar", for: .normal)
         closeButton.frame = CGRect(x: 20, y: 50, width: 80, height: 44)
@@ -89,7 +87,7 @@ class ShareViewController: UIViewController {
                 finish(error: "Nenhuma imagem ou link válido encontrado nos anexos")
             } else {
                 updateStatus("Concluído com sucesso!")
-                try? await Task.sleep(nanoseconds: 1_000_000_000) // 1 seg para ver o sucesso
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
                 finish()
             }
         }
@@ -121,7 +119,6 @@ class ShareViewController: UIViewController {
                 updateStatus("Baixando do link: \(url.lastPathComponent)")
                 print("DEBUG SHARE: URL recebida: \(url.absoluteString)")
                 
-                // Tenta baixar
                 let (data, response) = try await URLSession.shared.data(from: url)
                 
                 if let mimeType = response.mimeType, mimeType.contains("image") {
@@ -131,7 +128,6 @@ class ShareViewController: UIViewController {
                     print("DEBUG SHARE: URL é página HTML (Pinterest), tentando extrair imagem...")
                     updateStatus("Extraindo imagem da página...")
                     
-                    // Tenta extrair imagem do HTML do Pinterest
                     if let imageUrl = await extractImageFromPinterestHTML(data: data, originalUrl: url) {
                         print("DEBUG SHARE: Imagem encontrada: \(imageUrl)")
                         updateStatus("Baixando imagem...")
@@ -158,9 +154,7 @@ class ShareViewController: UIViewController {
             return nil
         }
         
-        // Pinterest usa vários padrões para imagens. Vamos tentar os mais comuns:
         
-        // Padrão 1: og:image meta tag
         if let ogImageRange = html.range(of: #"<meta property="og:image" content="([^"]+)"#, options: .regularExpression) {
             let match = html[ogImageRange]
             if let urlRange = match.range(of: #"content="([^"]+)"#, options: .regularExpression) {
@@ -174,7 +168,6 @@ class ShareViewController: UIViewController {
             }
         }
         
-        // Padrão 2: Busca por URLs de imagem i.pinimg.com
         let pattern = #"https://i\.pinimg\.com/[^"'\s>]+"#
         if let range = html.range(of: pattern, options: .regularExpression) {
             let urlString = String(html[range])
@@ -184,7 +177,6 @@ class ShareViewController: UIViewController {
             }
         }
         
-        // Padrão 3: Busca por data-attribute src
         if let srcRange = html.range(of: #"src="(https://i\.pinimg\.com/[^"]+)"#, options: .regularExpression) {
             let match = html[srcRange]
             if let urlRange = match.range(of: #"https://i\.pinimg\.com/[^"]+"#, options: .regularExpression) {
@@ -206,7 +198,6 @@ class ShareViewController: UIViewController {
             let provider = try await attachment.loadItem(forTypeIdentifier: UTType.text.identifier, options: nil)
             if let text = provider as? String {
                 print("DEBUG SHARE: Texto recebido: \(text)")
-                // Tenta extrair URL do texto
                 if let url = URL(string: text), url.scheme != nil {
                     print("DEBUG SHARE: Encontrou URL no texto: \(url.absoluteString)")
                     let attachment = NSItemProvider(item: url as NSURL, typeIdentifier: UTType.url.identifier)
@@ -222,7 +213,6 @@ class ShareViewController: UIViewController {
         do {
             updateStatus("Verificando autenticação...")
             
-            // Pega a sessão compartilhada via App Groups
             let session = try await supabase.auth.session
             let userId = session.user.id
             let accessToken = session.accessToken
@@ -274,7 +264,6 @@ class ShareViewController: UIViewController {
     }
 }
 
-// Extensão mantida para suporte Async
 extension NSItemProvider {
     func loadItem(forTypeIdentifier identifier: String, options: [AnyHashable : Any]? = nil) async throws -> NSSecureCoding {
         try await withCheckedThrowingContinuation { continuation in

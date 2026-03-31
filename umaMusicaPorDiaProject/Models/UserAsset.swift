@@ -2,7 +2,7 @@ import Foundation
 
 struct UserAsset: Codable, Identifiable {
     let id: UUID
-    let userId: String // Mudado para String pois o banco pode retornar fallback UUID ou ID real
+    let userId: String
     let imageUrl: String
     let createdAt: String
     

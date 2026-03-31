@@ -29,6 +29,10 @@ struct WordSlotVisor: View {
             .font(.system(size: 34, weight: .bold))
             .foregroundColor(Color(hex: "1E1E1E"))
             .tracking(0.4)
-            .frame(height: itemHeight)
+            .multilineTextAlignment(.center)
+            .lineLimit(2)
+            .minimumScaleFactor(0.5)
+            .padding(.horizontal, 10)
+            .frame(width: 302, height: itemHeight)
     }
 }

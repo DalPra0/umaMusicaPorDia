@@ -7,11 +7,29 @@ final class CollageViewModel {
     private let collageService: CollageService
     private let authService: AuthService
     
+    enum CanvasRatio: String, CaseIterable {
+        case square = "1:1"
+        case portrait = "4:5"
+        case story = "9:16"
+        
+        var ratio: CGFloat {
+            switch self {
+            case .square: return 1.0
+            case .portrait: return 4.0/5.0
+            case .story: return 9.0/16.0
+            }
+        }
+    }
+    
     var items: [CollageItem] = []
     var userAssets: [UserAsset] = []
     var canvasColor: Color = .white
+    var canvasRatio: CanvasRatio = .story
+    var selectedItemId: UUID? = nil
     var isSaving = false
     var isLoadingAssets = false
+    var isProcessing = false
+    var showBackgroundRefinement = false
     var errorMessage: String?
     
     private var undoStack: [[CollageItem]] = []
@@ -27,14 +45,86 @@ final class CollageViewModel {
     
     func addItem(_ image: UIImage) {
         saveState()
-        items.append(CollageItem(image: image))
+        let newItem = CollageItem(image: image)
+        items.append(newItem)
+        selectedItemId = newItem.id
     }
     
-    func toggleCanvasColor() {
+    func selectItem(_ id: UUID?) {
+        selectedItemId = id
+    }
+    
+    func setCanvasRatio(_ ratio: CanvasRatio) {
         saveState()
-        canvasColor = (canvasColor == .white) ? Color(hex: "F0F0F0") : .white
+        canvasRatio = ratio
     }
     
+    func setCanvasColor(_ color: Color) {
+        saveState()
+        canvasColor = color
+    }
+    
+    @MainActor
+    func removeBackgroundOfSelectedItem() async {
+        guard let id = selectedItemId,
+              let index = items.firstIndex(where: { $0.id == id }) else { return }
+        
+        let item = items[index]
+        
+        if item.isBackgroundRemoved {
+            showBackgroundRefinement = true
+            return
+        }
+        
+        isProcessing = true
+        defer { isProcessing = false }
+        
+        do {
+            let originalImage = item.originalImage
+            let (processedImage, maskImage) = try await ImageProcessor.removeBackground(from: originalImage)
+
+            if let currentIndex = items.firstIndex(where: { $0.id == id }) {
+                if let compressedData = ImageCompressor.compress(image: processedImage, for: .asset),
+                   let optimizedImage = UIImage(data: compressedData) {
+
+                    saveState()
+                    items[currentIndex].image = optimizedImage
+                    items[currentIndex].maskImage = maskImage
+                    items[currentIndex].isBackgroundRemoved = true
+                } else {
+                    saveState()
+                    items[currentIndex].image = processedImage
+                    items[currentIndex].maskImage = maskImage
+                    items[currentIndex].isBackgroundRemoved = true
+                }
+            }
+
+        } catch {
+            print("ERROR: \(error)")
+            self.errorMessage = "Erro ao remover fundo"
+        }
+    }
+    
+    @MainActor
+    func applyRefinedMask(image: UIImage, mask: UIImage) {
+        guard let id = selectedItemId,
+              let index = items.firstIndex(where: { $0.id == id }) else { return }
+
+        if let compressedData = ImageCompressor.compress(image: image, for: .asset),
+           let optimizedImage = UIImage(data: compressedData) {
+
+            saveState()
+            items[index].image = optimizedImage
+            items[index].maskImage = mask
+            showBackgroundRefinement = false
+            print("SUCCESS: Sticker optimized and saved")
+        } else {
+            saveState()
+            items[index].image = image
+            items[index].maskImage = mask
+            showBackgroundRefinement = false
+        }
+    }
     @MainActor
     func fetchUserAssets() async {
         guard let userId = authService.currentUser?.id else { return }
@@ -80,7 +170,7 @@ final class CollageViewModel {
         items = nextState
     }
     
-    func saveCollage(wordId: UUID, imageData: Data, assets: [CollageAsset]) async {
+    func saveCollage(wordId: UUID, image: UIImage, assets: [CollageAsset]) async {
         guard let userId = authService.currentUser?.id else {
             self.errorMessage = "Usuário não autenticado"
             return
@@ -88,10 +178,17 @@ final class CollageViewModel {
         
         isSaving = true
         defer { isSaving = false }
+
+        guard let compressedData = ImageCompressor.compress(image: image, for: .collage) else {
+            self.errorMessage = "Erro ao processar imagem"
+            return
+        }
         
         do {
-            try await collageService.saveCollage(userId: userId, wordId: wordId, imageData: imageData, assets: assets)
+            try await collageService.saveCollage(userId: userId, wordId: wordId, imageData: compressedData, assets: assets)
+            print("SUCCESS: Collage saved to database and storage")
         } catch {
+            print("DB ERROR: \(error)")
             self.errorMessage = error.localizedDescription
         }
     }

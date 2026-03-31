@@ -12,13 +12,11 @@ struct PinterestAssetsSheet: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Grabber
             RoundedRectangle(cornerRadius: 2.5)
                 .fill(Color.gray.opacity(0.4))
                 .frame(width: 36, height: 5)
                 .padding(.top, 6)
             
-            // Header
             HStack {
                 Text("Saved from Pinterest")
                     .font(.system(size: 20, weight: .semibold))
@@ -26,7 +24,6 @@ struct PinterestAssetsSheet: View {
                 
                 Spacer()
                 
-                // Botão de refresh
                 Button(action: {
                     Task {
                         await viewModel.fetchUserAssets()
@@ -49,7 +46,6 @@ struct PinterestAssetsSheet: View {
             .padding(.top, 14)
             .padding(.bottom, 20)
             
-            // Grid
             ScrollView {
                 if viewModel.isLoadingAssets {
                     ProgressView()
@@ -107,7 +103,7 @@ struct PinterestAssetsSheet: View {
                                     EmptyView()
                                 }
                             }
-                            .id(asset.id) // Importante para evitar recargas
+                            .id(asset.id)
                         }
                     }
                     .padding(.horizontal, 16)
@@ -117,7 +113,6 @@ struct PinterestAssetsSheet: View {
             Spacer()
         }
         .task(id: viewModel.userAssets.count) {
-            // Busca sempre que o sheet aparece ou quando a contagem muda
             await viewModel.fetchUserAssets()
         }
     }

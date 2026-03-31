@@ -9,6 +9,7 @@ struct CollageCreatorView: View {
     @State private var showImageSource = false
     @State private var showPinterestAssets = false
     @State private var showPhotosPicker = false
+    @State private var showCanvasSettings = false
     
     @State private var renderedImage: UIImage?
     @State private var navigateToExport = false
@@ -33,7 +34,7 @@ struct CollageCreatorView: View {
                     .padding(.bottom, 20)
                 
                 mainCanvas
-                    .frame(width: 302, height: 536)
+                    .frame(width: 302, height: 302 / viewModel.canvasRatio.ratio)
                     .clipped()
                     .background(viewModel.canvasColor)
                     .shadow(color: .black.opacity(0.1), radius: 10)
@@ -73,11 +74,25 @@ struct CollageCreatorView: View {
             PinterestAssetsSheet(viewModel: viewModel)
                 .presentationDetents([.large])
         }
+        .sheet(isPresented: $showCanvasSettings) {
+            CanvasSettingsSheet(viewModel: viewModel)
+        }
+        .fullScreenCover(isPresented: $viewModel.showBackgroundRefinement) {
+            if let id = viewModel.selectedItemId,
+               let item = viewModel.items.first(where: { $0.id == id }) {
+                BackgroundRefinementView(
+                    originalImage: item.originalImage,
+                    initialMask: item.maskImage,
+                    onSave: { refinedImage, refinedMask in
+                        viewModel.applyRefinedMask(image: refinedImage, mask: refinedMask)
+                    }
+                )
+            }
+        }
         .photosPicker(isPresented: $showPhotosPicker, selection: $selectedItems, matching: .images)
         .onChange(of: selectedItems) { _, _ in loadSelectedImages() }
     }
     
-    // MARK: - Components
     
     private var navigationToolbar: some View {
         HStack {
@@ -132,13 +147,30 @@ struct CollageCreatorView: View {
                 .font(.system(size: 34, weight: .bold))
                 .foregroundColor(Color(hex: "4A4242"))
                 .tracking(0.4)
+                .lineLimit(2)
+                .minimumScaleFactor(0.5)
         }
     }
     
     private var mainCanvas: some View {
         ZStack {
+            Color.white.opacity(0.001)
+                .onTapGesture {
+                    viewModel.selectItem(nil)
+                }
+            
             ForEach($viewModel.items) { $item in
-                CollageItemView(item: $item, onInteractionEnded: { viewModel.saveState() })
+                CollageItemView(
+                    item: $item,
+                    isSelected: viewModel.selectedItemId == item.id,
+                    onSelect: {
+                        withAnimation(.easeInOut(duration: 0.2)) {
+                            viewModel.selectItem(item.id)
+                        }
+                    },
+                    onInteractionEnded: { viewModel.saveState() }
+                )
+                .zIndex(viewModel.selectedItemId == item.id ? 100 : 0)
             }
         }
     }
@@ -149,21 +181,40 @@ struct CollageCreatorView: View {
                 showLayers = true
             }
             
-            ToolbarButton(title: "Images", icon: "photo") {
-                showImageSource = true
+            if let selectedId = viewModel.selectedItemId,
+               let item = viewModel.items.first(where: { $0.id == selectedId }) {
+                ToolbarButton(
+                    title: viewModel.isProcessing ? "Limpando..." : (item.isBackgroundRemoved ? "Ajustar Fundo" : "Remover Fundo"),
+                    icon: item.isBackgroundRemoved ? "magicmouse" : "person.and.background.dotted",
+                    isLoading: viewModel.isProcessing
+                ) {
+                    Task {
+                        await viewModel.removeBackgroundOfSelectedItem()
+                    }
+                }
+                .disabled(viewModel.isProcessing)
+            } else {
+                ToolbarButton(title: "Images", icon: "photo") {
+                    showImageSource = true
+                }
             }
             
-            ToolbarButton(title: "Canvas", icon: "arrow.up.left.and.arrow.down.right") {
-                viewModel.toggleCanvasColor()
+            ToolbarButton(title: "Canvas", icon: "square.split.2x2") {
+                showCanvasSettings = true
             }
         }
     }
     
-    private func ToolbarButton(title: String, icon: String, action: @escaping () -> Void) -> some View {
+    private func ToolbarButton(title: String, icon: String, isLoading: Bool = false, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             VStack(spacing: 8) {
-                Image(systemName: icon)
-                    .font(.system(size: 24))
+                if isLoading {
+                    ProgressView()
+                        .frame(width: 24, height: 24)
+                } else {
+                    Image(systemName: icon)
+                        .font(.system(size: 24))
+                }
                 Text(title)
                     .font(.system(size: 10, weight: .medium))
             }
@@ -189,9 +240,7 @@ struct CollageCreatorView: View {
         let renderer = ImageRenderer(content: CollageCanvasView(viewModel: viewModel))
         renderer.scale = 3.0
         
-        if let uiImage = renderer.uiImage,
-           let imageData = uiImage.jpegData(compressionQuality: 0.8) {
-            
+        if let uiImage = renderer.uiImage {
             self.renderedImage = uiImage
             
             let assets = viewModel.items.map { item in
@@ -200,7 +249,7 @@ struct CollageCreatorView: View {
             }
             
             Task {
-                await viewModel.saveCollage(wordId: homeViewModel.dailyWord?.id ?? UUID(), imageData: imageData, assets: assets)
+                await viewModel.saveCollage(wordId: homeViewModel.dailyWord?.id ?? UUID(), image: uiImage, assets: assets)
                 navigateToExport = true
             }
         }
