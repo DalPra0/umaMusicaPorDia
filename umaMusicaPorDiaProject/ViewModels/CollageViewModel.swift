@@ -38,9 +38,14 @@ final class CollageViewModel {
     var canUndo: Bool { !undoStack.isEmpty }
     var canRedo: Bool { !redoStack.isEmpty }
     
-    init(collageService: CollageService = CollageService(), authService: AuthService = AuthService()) {
+    init(collageService: CollageService = CollageService(), authService: AuthService = AuthService(), backgroundImageName: String? = nil) {
         self.collageService = collageService
         self.authService = authService
+        
+        if let imageName = backgroundImageName, let uiImage = UIImage(named: imageName) {
+            let newItem = CollageItem(image: uiImage)
+            items.append(newItem)
+        }
     }
     
     func addItem(_ image: UIImage) {

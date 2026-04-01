@@ -2,8 +2,12 @@ import SwiftUI
 import PhotosUI
 
 struct CollageCreatorView: View {
-    @State private var viewModel = CollageViewModel()
+    @State private var viewModel: CollageViewModel
     @State private var selectedItems: [PhotosPickerItem] = []
+    
+    init(backgroundImageName: String? = nil) {
+        _viewModel = State(initialValue: CollageViewModel(backgroundImageName: backgroundImageName))
+    }
     
     @State private var showLayers = false
     @State private var showImageSource = false

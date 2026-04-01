@@ -24,7 +24,9 @@ struct HomeView: View {
                 }
             }
             .navigationDestination(isPresented: $navigateToCollage) {
-                CollageCreatorView()
+                if let word = viewModel.dailyWord?.word {
+                    BasketSelectionView(dailyWord: word)
+                }
             }
             .sheet(isPresented: $showSettings) {
                 SettingsSheet(viewModel: viewModel)

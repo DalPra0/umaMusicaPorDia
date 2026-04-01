@@ -1,0 +1,22 @@
+import SwiftUI
+
+struct BasketTheme: Identifiable {
+    let id = UUID()
+    let name: String
+    let folderName: String
+    let variants: [String]
+    
+    var previewImageName: String {
+        variants.first ?? ""
+    }
+}
+
+extension BasketTheme {
+    static let allThemes: [BasketTheme] = [
+        BasketTheme(name: "AIRPORT BASKET", folderName: "AirportBasket", variants: ["AirportBasket"]),
+        BasketTheme(name: "BASKET 1", folderName: "Basket1", variants: ["Basket1Blue", "Basket1Green", "Basket1Pink", "Basket1Red", "Basket1Yellow"]),
+        BasketTheme(name: "BASKET 2", folderName: "Basket2", variants: ["Basket2Blue", "Basket2Green", "Basket2Pink", "Basket2Red", "Basket2Yellow"]),
+        BasketTheme(name: "BENTO", folderName: "Bento", variants: ["BentoBlue", "BentoGreen", "BentoPink", "BentoRed", "BentoYellow"]),
+        BasketTheme(name: "PACKAGING", folderName: "Packaging", variants: ["PackagingBlue", "PackagingGreen", "PackagingPink", "PackagingRed", "PackagingYellow"])
+    ]
+}
