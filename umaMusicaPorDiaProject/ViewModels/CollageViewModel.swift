@@ -191,9 +191,7 @@ final class CollageViewModel {
         
         do {
             try await collageService.saveCollage(userId: userId, wordId: wordId, imageData: compressedData, assets: assets)
-            print("SUCCESS: Collage saved to database and storage")
         } catch {
-            print("DB ERROR: \(error)")
             self.errorMessage = error.localizedDescription
         }
     }
