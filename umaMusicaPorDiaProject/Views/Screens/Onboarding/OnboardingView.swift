@@ -4,119 +4,173 @@ struct OnboardingView: View {
     @State private var currentPage = 0
     @Binding var hasCompletedOnboarding: Bool
     
-    private let steps: [OnboardingStep] = [
-        OnboardingStep(
-            title: "Uma música por dia",
-            subtitle: "Descubra uma nova melodia todos os dias baseada em uma palavra única.",
-            color: .purple,
-            icon: "music.note"
-        ),
-        OnboardingStep(
-            title: "Crie Memórias",
-            subtitle: "Gere colagens visuais incríveis das suas descobertas musicais.",
-            color: .blue,
-            icon: "square.stack.3d.up.fill"
-        ),
-        OnboardingStep(
-            title: "Compartilhe a Vibe",
-            subtitle: "Mostre ao mundo sua jornada musical diária com apenas um toque.",
-            color: .pink,
-            icon: "shareplay"
-        )
-    ]
-    
     var body: some View {
-        ZStack {
-            Color.black.ignoresSafeArea()
-            
-            ForEach(0..<steps.count, id: \.self) { index in
-                onboardingLayer(for: index)
-            }
-            
-            VStack {
-                Spacer()
+        GeometryReader { geometry in
+            ZStack {
+                // Gradiente de fundo
+                LinearGradient(
+                    gradient: Gradient(colors: [
+                        Color(red: 0.6, green: 1.0, blue: 0.6),
+                        Color(red: 0.5, green: 0.4, blue: 0.9),
+                        Color(red: 0.6, green: 1.0, blue: 0.6)
+                    ]),
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .ignoresSafeArea()
                 
-                VStack(spacing: 12) {
-                    Text(steps[currentPage].title)
-                        .font(.system(size: 28, weight: .bold))
-                        .foregroundColor(.white)
-                        .multilineTextAlignment(.center)
-                        .transition(.opacity.combined(with: .move(edge: .bottom)))
-                        .id("title_\(currentPage)")
+                TabView(selection: $currentPage) {
+                    // Tela 1 - Verde
+                    OnboardingPage1()
+                        .tag(0)
                     
-                    Text(steps[currentPage].subtitle)
-                        .font(.system(size: 16))
-                        .foregroundColor(.gray)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal, 40)
-                        .transition(.opacity.combined(with: .move(edge: .bottom)))
-                        .id("subtitle_\(currentPage)")
+                    // Tela 2 - Amarelo
+                    OnboardingPage2()
+                        .tag(1)
+                    
+                    // Tela 3 - Azul
+                    OnboardingPage3(hasCompletedOnboarding: $hasCompletedOnboarding)
+                        .tag(2)
                 }
-                .padding(.bottom, 40)
+                .tabViewStyle(.page(indexDisplayMode: .never))
+                .ignoresSafeArea()
                 
-                AppButton(
-                    title: currentPage == steps.count - 1 ? "COMEÇAR" : "PRÓXIMO",
-                    action: {
-                        withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                            if currentPage < steps.count - 1 {
-                                currentPage += 1
-                            } else {
-                                hasCompletedOnboarding = true
-                            }
+                // Logo e controles fixos
+                VStack {
+                    // Logo no topo
+                    Text("loquinho")
+                        .font(.system(size: 20, weight: .bold))
+                        .foregroundColor(Color(red: 0.5, green: 0.4, blue: 0.9))
+                        .padding(.top, 60)
+                    
+                    Spacer()
+                    
+                    // Indicadores de página
+                    HStack(spacing: 8) {
+                        ForEach(0..<3, id: \.self) { index in
+                            Circle()
+                                .fill(currentPage == index ? Color.white : Color.white.opacity(0.4))
+                                .frame(width: 8, height: 8)
                         }
                     }
-                )
-                .padding(.horizontal, 24)
-                .padding(.bottom, 20)
-                
-                HStack(spacing: 8) {
-                    ForEach(0..<steps.count, id: \.self) { index in
-                        Capsule()
-                            .fill(currentPage == index ? Color.white : Color.gray.opacity(0.3))
-                            .frame(width: currentPage == index ? 20 : 8, height: 8)
-                    }
+                    .padding(.bottom, 40)
                 }
-                .padding(.bottom, 20)
             }
         }
     }
-    
-    @ViewBuilder
-    private func onboardingLayer(for index: Int) -> some View {
-        let isPast = index < currentPage
-        let isCurrent = index == currentPage
-        
-        let yOffset: CGFloat = isPast ? 300 : (isCurrent ? 0 : -600)
-        let opacity: Double = isPast ? 0.4 : (isCurrent ? 1.0 : 0.0)
-        let scale: CGFloat = isPast ? 0.8 : (isCurrent ? 1.0 : 1.2)
-        
-        VStack {
+}
+
+// TELA 1: Cesta verde NO MEIO
+struct OnboardingPage1: View {
+    var body: some View {
+        VStack(spacing: 0) {
+            Spacer()
+                .frame(height: 120)
+            
+            Text("Crie coleções\nnostálgicas!")
+                .font(.system(size: 32, weight: .bold))
+                .foregroundColor(.white)
+                .multilineTextAlignment(.center)
+            
+            Spacer()
+                .frame(height: 40)
+            
+            // Cesta verde no centro com sticker
             ZStack {
-                RoundedRectangle(cornerRadius: 30)
-                    .fill(steps[index].color.gradient)
-                    .frame(width: 280, height: 380)
-                    .overlay(
-                        Image(systemName: steps[index].icon)
-                            .font(.system(size: 80))
-                            .foregroundColor(.white)
-                    )
-                    .shadow(color: steps[index].color.opacity(0.3), radius: 20, x: 0, y: 10)
+                Image("Basket1Green")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 500)
+                    .rotationEffect(.degrees(90))
                 
-                if isPast {
-                    LinearGradient(
-                        gradient: Gradient(colors: [.clear, .black.opacity(0.8)]),
-                        startPoint: .top,
-                        endPoint: .bottom
-                    )
-                    .clipShape(RoundedRectangle(cornerRadius: 30))
-                }
+                // Sticker verde
+                Image("StickerGreen")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 280)
             }
-            .scaleEffect(scale)
-            .offset(y: yOffset)
-            .opacity(opacity)
-            .blur(radius: isPast ? 4 : 0)
+            
+            Spacer()
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .zIndex(Double(index))
+    }
+}
+
+// TELA 2: Cesta amarela LÁ EMBAIXO (quase fora da tela)
+struct OnboardingPage2: View {
+    var body: some View {
+        VStack(spacing: 0) {
+            Spacer()
+                .frame(height: 120)
+            
+            Text("Salve fotos direto da\ninternet!")
+                .font(.system(size: 32, weight: .bold))
+                .foregroundColor(.white)
+                .multilineTextAlignment(.center)
+            
+            Spacer()
+            
+            // Cesta amarela lá embaixo com sticker
+            ZStack {
+                Image("Basket1Yellow")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 500)
+                    .rotationEffect(.degrees(90))
+                    .offset(y: 150) // Empurra pra baixo (quase fora da tela)
+                
+                // Sticker amarelo
+                Image("StickerYellow")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(width: 340)
+                    .offset(y: -40)
+            }
+        }
+    }
+}
+
+// TELA 3: Cesta azul embaixo (sem sticker)
+struct OnboardingPage3: View {
+    @Binding var hasCompletedOnboarding: Bool
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            Spacer()
+                .frame(height: 120)
+            
+            Text("Compartilhe nas\nredes sociais!")
+                .font(.system(size: 32, weight: .bold))
+                .foregroundColor(.white)
+                .multilineTextAlignment(.center)
+            
+            Spacer()
+            
+            // Cesta azul embaixo (sem rotação)
+            Image("Basket1Blue")
+                .resizable()
+                .aspectRatio(contentMode: .fit)
+                .frame(width: 400)
+                .offset(y: 80)
+            
+            Spacer()
+                .frame(height: 40)
+            
+            // Botão começar
+            Button(action: {
+                hasCompletedOnboarding = true
+            }) {
+                Text("COMEÇAR")
+                    .font(.system(size: 16, weight: .bold))
+                    .foregroundColor(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(
+                        RoundedRectangle(cornerRadius: 12)
+                            .fill(Color.white.opacity(0.2))
+                    )
+            }
+            .padding(.horizontal, 24)
+            .padding(.bottom, 80)
+        }
     }
 }
