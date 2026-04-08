@@ -22,7 +22,6 @@ struct ImageCompressor {
     static func compress(image: UIImage, for type: CompressionType) -> Data? {
         let resizedImage = self.resize(image: image, toMaxDimension: type.maxDimension)
         
-        // Remove canal alpha desnecessário para imagens opacas (melhora performance)
         let opaqueImage = self.removeAlphaChannel(from: resizedImage)
         
         let result: Data?
@@ -75,10 +74,9 @@ struct ImageCompressor {
         let size = image.size
         let scale = image.scale
         
-        // Cria contexto RGB (sem alpha) para remover canal de transparência
         let format = UIGraphicsImageRendererFormat()
         format.scale = scale
-        format.opaque = true // Força formato opaco (sem alpha)
+        format.opaque = true
         
         let renderer = UIGraphicsImageRenderer(size: size, format: format)
         return renderer.image { context in

@@ -9,7 +9,7 @@ struct BasketSelectionView: View {
             GeometryReader { screenGeometry in
                 let screenHeight = screenGeometry.size.height
                 // Aumentamos para 75% da tela para ser realmente imersivo
-                let itemHeight = screenHeight * 0.75 
+                let itemHeight = screenHeight * 0.75
                 
                 ZStack(alignment: .bottom) {
                     Color(hex: "D9D9D9")

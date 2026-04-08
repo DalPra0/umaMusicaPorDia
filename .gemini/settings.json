@@ -3,6 +3,10 @@
     "figma": {
       "url": "https://mcp.figma.com/mcp",
       "type": "sse"
+    },
+    "figma-desktop": {
+      "url": "http://127.0.0.1:3845/mcp",
+      "type": "http"
     }
   }
 }
