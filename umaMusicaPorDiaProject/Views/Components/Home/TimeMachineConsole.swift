@@ -4,26 +4,28 @@ struct TimeMachineConsole: View {
     let viewModel: HomeViewModel
     
     var body: some View {
-        ZStack {
-            RoundedRectangle(cornerRadius: 18)
-                .fill(Color(hex: "1E1E1E"))
-                .frame(width: 341, height: 444)
-                .shadow(color: .black.opacity(0.2), radius: 15, y: 10)
+        GeometryReader { geo in
+            let size = geo.size
             
-            WordSlotVisor(viewModel: viewModel)
-            
-            Text(viewModel.username)
-                .font(.system(size: 34, weight: .bold))
-                .foregroundColor(.white)
-                .tracking(0.4)
-                .multilineTextAlignment(.center)
-                .lineLimit(2)
-                .minimumScaleFactor(0.5)
-                .frame(width: 300)
-                .offset(y: 110)
-            
-            MachineLever(pullAmount: viewModel.leverPull)
-                .offset(x: 130, y: 50)
+            ZStack(alignment: .top) {
+                // 1. Imagem de Fundo da Máquina Gacha (Imersiva)
+                Image("gacha")
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .frame(width: size.width * 1.3)
+                    .offset(y: -size.height * 0.15) // Sobe a imagem
+                
+                // 2. Área do Logo (Superior)
+                Text("LOGO")
+                    .font(.system(size: 48, weight: .black))
+                    .foregroundColor(.white)
+                    .offset(y: size.height * 0.12) // Alinhado com a máquina subida
+                
+                // 3. Visor de Palavras (Centralizado no buraco da máquina)
+                WordSlotVisor(viewModel: viewModel)
+                    .offset(y: size.height * 0.32) // Ajustado proporcionalmente
+            }
+            .frame(width: size.width)
         }
     }
 }

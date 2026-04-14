@@ -1,7 +1,10 @@
 import SwiftUI
+import RevenueCatUI
 
 struct PinterestAssetsSheet: View {
     @Environment(\.dismiss) var dismiss
+    @Environment(SubscriptionManager.self) var subscriptionManager
+    @State private var showPaywall = false
     var viewModel: CollageViewModel
     
     let columns = [
@@ -79,9 +82,23 @@ struct PinterestAssetsSheet: View {
                                         .aspectRatio(1, contentMode: .fill)
                                         .cornerRadius(12)
                                         .clipped()
+                                        .overlay(
+                                            ZStack {
+                                                if !subscriptionManager.isPremium {
+                                                    Color.black.opacity(0.2)
+                                                    Image(systemName: "lock.fill")
+                                                        .foregroundColor(.white)
+                                                        .font(.system(size: 16, weight: .bold))
+                                                }
+                                            }
+                                        )
                                         .onTapGesture {
-                                            viewModel.addRemoteAsset(asset.imageUrl)
-                                            dismiss()
+                                            if subscriptionManager.isPremium {
+                                                viewModel.addRemoteAsset(asset.imageUrl)
+                                                dismiss()
+                                            } else {
+                                                showPaywall = true
+                                            }
                                         }
                                 case .failure(let error):
                                     RoundedRectangle(cornerRadius: 12)
@@ -114,6 +131,9 @@ struct PinterestAssetsSheet: View {
         }
         .task(id: viewModel.userAssets.count) {
             await viewModel.fetchUserAssets()
+        }
+        .sheet(isPresented: $showPaywall) {
+            PaywallView(displayCloseButton: true)
         }
     }
 }

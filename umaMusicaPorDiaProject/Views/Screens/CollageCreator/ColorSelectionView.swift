@@ -1,8 +1,11 @@
 import SwiftUI
+import RevenueCatUI
 
 struct ColorSelectionView: View {
     let theme: BasketTheme
     @Environment(\.dismiss) var dismiss
+    @Environment(SubscriptionManager.self) var subscriptionManager
+    @State private var showPaywall = false
     
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -25,12 +28,42 @@ struct ColorSelectionView: View {
                     // Seletor de Cores com Trava (Snap)
                     ScrollView(.vertical, showsIndicators: false) {
                         VStack(spacing: 0) {
-                            ForEach(theme.variants, id: \.self) { variant in
-                                NavigationLink(destination: CollageCreatorView(backgroundImageName: variant)) {
-                                    colorCard(variant)
-                                        .frame(height: itemHeight)
+                            ForEach(Array(theme.variants.enumerated()), id: \.offset) { index, variant in
+                                let isLocked = index >= 3 && !subscriptionManager.isPremium
+                                
+                                Button(action: {
+                                    if isLocked {
+                                        showPaywall = true
+                                    }
+                                }) {
+                                    ZStack {
+                                        if isLocked {
+                                            colorCard(variant)
+                                                .frame(height: itemHeight)
+                                                .overlay(
+                                                    VStack(spacing: 12) {
+                                                        Image(systemName: "lock.fill")
+                                                            .font(.system(size: 40))
+                                                            .foregroundColor(.white)
+                                                            .shadow(radius: 4)
+                                                        Text("PREMIUM")
+                                                            .font(.system(size: 14, weight: .bold))
+                                                            .foregroundColor(.white)
+                                                            .tracking(2)
+                                                    }
+                                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                                    .background(Color.black.opacity(0.15))
+                                                )
+                                        } else {
+                                            NavigationLink(destination: CollageCreatorView(backgroundImageName: variant)) {
+                                                colorCard(variant)
+                                                    .frame(height: itemHeight)
+                                            }
+                                        }
+                                    }
                                 }
                                 .buttonStyle(PlainButtonStyle())
+                                .disabled(isLocked && showPaywall)
                             }
                         }
                         .scrollTargetLayout()
@@ -49,6 +82,9 @@ struct ColorSelectionView: View {
             .allowsHitTesting(false)
         }
         .navigationBarHidden(true)
+        .sheet(isPresented: $showPaywall) {
+            PaywallView(displayCloseButton: true)
+        }
     }
     
     // MARK: - Components

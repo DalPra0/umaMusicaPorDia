@@ -24,30 +24,25 @@ struct CollageCreatorView: View {
 
     var body: some View {
         ZStack {
-            Color(hex: "D9D9D9")
+            Color.white
                 .ignoresSafeArea()
             
             VStack(spacing: 0) {
                 navigationToolbar
-                    .padding(.horizontal, 20)
-                    .padding(.top, 10)
+                    .padding(.horizontal, 16)
+                    .padding(.top, 63)
                 
                 wordHeader
-                    .padding(.horizontal, 44)
-                    .padding(.top, 24)
-                    .padding(.bottom, 20)
+                    .padding(.top, 16)
+                    .padding(.bottom, 8)
                 
-                mainCanvas
-                    .frame(width: 302, height: 302 / viewModel.canvasRatio.ratio)
-                    .clipped()
-                    .background(viewModel.canvasColor)
-                    .shadow(color: .black.opacity(0.1), radius: 10)
+                canvasContainer
                 
                 Spacer()
                 
                 bottomToolbar
-                    .padding(.horizontal, 30)
-                    .padding(.bottom, 20)
+                    .padding(.horizontal, 48)
+                    .padding(.bottom, 58)
             }
         }
         .navigationBarHidden(true)
@@ -103,7 +98,7 @@ struct CollageCreatorView: View {
             Button(action: { dismiss() }) {
                 Image(systemName: "chevron.left")
                     .font(.system(size: 20, weight: .medium))
-                    .foregroundColor(.black)
+                    .foregroundStyle(Color(hex: "6759F1"))
             }
             
             Spacer()
@@ -112,14 +107,14 @@ struct CollageCreatorView: View {
                 Button(action: { viewModel.undo() }) {
                     Image(systemName: "arrow.uturn.backward.circle")
                         .font(.system(size: 24))
-                        .foregroundColor(viewModel.canUndo ? .black : .gray)
+                        .foregroundStyle(viewModel.canUndo ? Color(hex: "6759F1") : Color.gray)
                 }
                 .disabled(!viewModel.canUndo)
                 
                 Button(action: { viewModel.redo() }) {
                     Image(systemName: "arrow.uturn.forward.circle")
                         .font(.system(size: 24))
-                        .foregroundColor(viewModel.canRedo ? .black : .gray)
+                        .foregroundStyle(viewModel.canRedo ? Color(hex: "6759F1") : Color.gray)
                 }
                 .disabled(!viewModel.canRedo)
             }
@@ -132,7 +127,7 @@ struct CollageCreatorView: View {
                 } else {
                     Image(systemName: "square.and.arrow.up")
                         .font(.system(size: 20, weight: .medium))
-                        .foregroundColor(.black)
+                        .foregroundStyle(Color(hex: "6759F1"))
                 }
             }
             .disabled(viewModel.isSaving || viewModel.items.isEmpty)
@@ -140,20 +135,38 @@ struct CollageCreatorView: View {
     }
     
     private var wordHeader: some View {
-        VStack(alignment: .leading, spacing: 4) {
+        VStack(spacing: 0) {
             Text("A palavra do dia é:")
                 .font(.system(size: 16))
-                .foregroundColor(Color(hex: "4A4242"))
+                .foregroundStyle(Color(hex: "6759F1"))
                 .tracking(-0.31)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(maxWidth: .infinity, alignment: .center)
             
             Text(homeViewModel.dailyWord?.word.uppercased() ?? "CARREGANDO...")
                 .font(.system(size: 34, weight: .bold))
-                .foregroundColor(Color(hex: "4A4242"))
+                .foregroundStyle(Color(hex: "6759F1"))
                 .tracking(0.4)
                 .lineLimit(2)
                 .minimumScaleFactor(0.5)
+                .frame(maxWidth: .infinity, alignment: .center)
         }
+    }
+    
+    private var canvasContainer: some View {
+        RoundedRectangle(cornerRadius: 16)
+            .stroke(Color(hex: "6759F1"), lineWidth: 1)
+            .frame(width: 302, height: 494)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(Color.white)
+            )
+            .overlay(alignment: .top) {
+                mainCanvas
+                    .frame(width: 259, height: 412)
+                    .clipped()
+                    .background(viewModel.canvasColor)
+                    .padding(.top, 32)
+            }
     }
     
     private var mainCanvas: some View {
@@ -180,16 +193,16 @@ struct CollageCreatorView: View {
     }
     
     private var bottomToolbar: some View {
-        HStack {
-            ToolbarButton(title: "Layers", icon: "square.3.layers.3d") {
+        HStack(spacing: 66) {
+            ToolbarButton(title: "Camadas", icon: "square.3.layers.3d") {
                 showLayers = true
             }
             
             if let selectedId = viewModel.selectedItemId,
                let item = viewModel.items.first(where: { $0.id == selectedId }) {
                 ToolbarButton(
-                    title: viewModel.isProcessing ? "Limpando..." : (item.isBackgroundRemoved ? "Ajustar Fundo" : "Remover Fundo"),
-                    icon: item.isBackgroundRemoved ? "magicmouse" : "person.and.background.dotted",
+                    title: "Fundo",
+                    icon: item.isBackgroundRemoved ? "wand.and.stars" : "photo.on.rectangle.angled",
                     isLoading: viewModel.isProcessing
                 ) {
                     Task {
@@ -198,12 +211,12 @@ struct CollageCreatorView: View {
                 }
                 .disabled(viewModel.isProcessing)
             } else {
-                ToolbarButton(title: "Images", icon: "photo") {
+                ToolbarButton(title: "Fundo", icon: "photo.on.rectangle.angled") {
                     showImageSource = true
                 }
             }
             
-            ToolbarButton(title: "Canvas", icon: "square.split.2x2") {
+            ToolbarButton(title: "Formatos", icon: "crop.rotate") {
                 showCanvasSettings = true
             }
         }
@@ -212,18 +225,26 @@ struct CollageCreatorView: View {
     private func ToolbarButton(title: String, icon: String, isLoading: Bool = false, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             VStack(spacing: 8) {
-                if isLoading {
-                    ProgressView()
-                        .frame(width: 24, height: 24)
-                } else {
-                    Image(systemName: icon)
-                        .font(.system(size: 24))
+                ZStack {
+                    RoundedRectangle(cornerRadius: 7)
+                        .fill(Color(hex: "6759F1"))
+                        .frame(width: 53, height: 53)
+                    
+                    if isLoading {
+                        ProgressView()
+                            .tint(.white)
+                            .frame(width: 24, height: 24)
+                    } else {
+                        Image(systemName: icon)
+                            .font(.system(size: 24))
+                            .foregroundStyle(.white)
+                    }
                 }
+                
                 Text(title)
-                    .font(.system(size: 10, weight: .medium))
+                    .font(.system(size: 12, weight: .bold))
+                    .foregroundStyle(Color(hex: "6759F1"))
             }
-            .foregroundColor(.black)
-            .frame(maxWidth: .infinity)
         }
     }
     

@@ -1,10 +1,17 @@
 import SwiftUI
 import Supabase
+import RevenueCat
 
 @main
 struct umaMusicaPorDiaProjectApp: App {
     @State private var isAuthenticated = false
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
+    
+    init() {
+        // Inicialização do RevenueCat com a chave real
+        Purchases.logLevel = .debug
+        Purchases.configure(withAPIKey: "test_AdqgNewFdBqHYSTisdwQTGbYnjH")
+    }
     
     var body: some Scene {
         WindowGroup {
@@ -21,6 +28,7 @@ struct umaMusicaPorDiaProjectApp: App {
                     AuthView()
                 }
             }
+            .environment(SubscriptionManager.shared) // Injeção do Gerenciador de Assinaturas
             .animation(.easeInOut, value: isAuthenticated)
             .animation(.easeInOut, value: hasCompletedOnboarding)
             .task {

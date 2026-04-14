@@ -2,37 +2,42 @@ import SwiftUI
 
 struct WordSlotVisor: View {
     let viewModel: HomeViewModel
-    private let itemHeight: CGFloat = 80
+    private let itemHeight: CGFloat = 60 // Altura menor para caberem mais palavras
     
     var body: some View {
         ZStack {
-            RoundedRectangle(cornerRadius: 12)
+            // Fundo Branco e Borda Rosa Choque do Visor Gacha (Formato Pílula)
+            RoundedRectangle(cornerRadius: 45)
                 .fill(Color.white)
-                .frame(width: 302, height: 220)
+                .frame(width: 200, height: 240)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 45)
+                        .stroke(Color(hex: "FC02B2"), lineWidth: 10)
+                )
             
+            // Área de Texto Giratório (Mostra 3 palavras ao mesmo tempo)
             VStack(spacing: 0) {
+                // Palavras antes
                 ForEach(viewModel.placeholderWords, id: \.self) { word in
                     wordText(word)
                 }
                 
-                wordText(viewModel.dailyWord?.word.uppercased() ?? "...")
+                // Palavra atual
+                wordText(viewModel.dailyWord?.word.uppercased() ?? "SORTEAR")
             }
-            .offset(y: viewModel.wordsOffset)
-            .frame(height: 220, alignment: .top)
+            .offset(y: viewModel.wordsOffset + 90) // Centraliza a palavra do meio
+            .frame(width: 180, height: 220, alignment: .top)
             .clipped()
         }
-        .offset(y: -70)
     }
     
     private func wordText(_ text: String) -> some View {
         Text(text)
-            .font(.system(size: 34, weight: .bold))
-            .foregroundColor(Color(hex: "1E1E1E"))
-            .tracking(0.4)
+            .font(.system(size: 24, weight: .bold))
+            .foregroundColor(.black)
             .multilineTextAlignment(.center)
-            .lineLimit(2)
+            .lineLimit(1)
             .minimumScaleFactor(0.5)
-            .padding(.horizontal, 10)
-            .frame(width: 302, height: itemHeight)
+            .frame(width: 160, height: itemHeight)
     }
 }

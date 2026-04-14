@@ -1,4 +1,6 @@
 import SwiftUI
+import RevenueCat
+import RevenueCatUI
 
 struct HomeView: View {
     @State private var viewModel = HomeViewModel()
@@ -7,20 +9,27 @@ struct HomeView: View {
     
     var body: some View {
         NavigationStack {
-            ZStack {
-                Color(hex: "D9D9D9")
+            ZStack(alignment: .top) {
+                // 1. Fundo Gradiente exato do Figma
+                LinearGradient(
+                    colors: [Color(hex: "81E862"), Color(hex: "6759F1")],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .ignoresSafeArea()
+                
+                // 2. Máquina Gacha (Começando do topo absoluto)
+                TimeMachineConsole(viewModel: viewModel)
                     .ignoresSafeArea()
                 
-                VStack(spacing: 0) {
+                // 3. Botão Girar e Barra Superior flutuando por cima
+                VStack {
                     headerToolbar
                     
                     Spacer()
                     
-                    TimeMachineConsole(viewModel: viewModel)
-                    
-                    Spacer()
-                    
                     actionButton
+                        .padding(.bottom, 40)
                 }
             }
             .navigationDestination(isPresented: $navigateToCollage) {
@@ -35,33 +44,42 @@ struct HomeView: View {
     }
     
     private var headerToolbar: some View {
-        HStack {
-            Spacer()
-            Button(action: { showSettings = true }) {
-                Image(systemName: "gearshape")
-                    .font(.system(size: 24))
-                    .foregroundColor(.black)
+        VStack {
+            HStack {
+                Spacer()
+                Button(action: { showSettings = true }) {
+                    Image(systemName: "gearshape.fill")
+                        .font(.system(size: 28))
+                        .foregroundColor(Color(hex: "6759F1"))
+                }
             }
+            .padding(.horizontal, 24)
+            .padding(.top, 10)
+            
+            Spacer()
         }
-        .padding(.horizontal, 20)
-        .padding(.top, 10)
     }
     
     private var actionButton: some View {
-        AppButton(title: buttonTitle) {
+        Button(action: {
             if !viewModel.isSpinning && viewModel.dailyWord != nil {
                 navigateToCollage = true
             } else if !viewModel.isSpinning {
                 viewModel.spin()
             }
+        }) {
+            Text(buttonTitle)
+                .font(.system(size: 20, weight: .bold))
+                .foregroundColor(.white)
+                .frame(width: 340, height: 50)
+                .background(Color(hex: "FC02B2"))
+                .clipShape(RoundedRectangle(cornerRadius: 12))
         }
-        .padding(.horizontal, 20)
-        .padding(.bottom, 40)
         .disabled(viewModel.isSpinning)
     }
     
     private var buttonTitle: String {
         if viewModel.isSpinning { return "Sorteando..." }
-        return viewModel.dailyWord != nil ? "Continuar" : "Girar Máquina"
+        return viewModel.dailyWord != nil ? "Continuar" : "Girar"
     }
 }

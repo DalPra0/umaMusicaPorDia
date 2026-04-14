@@ -1,8 +1,11 @@
 import SwiftUI
+import RevenueCatUI
 
 struct CanvasSettingsSheet: View {
     @Bindable var viewModel: CollageViewModel
     @Environment(\.dismiss) var dismiss
+    @Environment(SubscriptionManager.self) var subscriptionManager
+    @State private var showPaywall = false
     
     private let colors: [Color] = [.white, Color(hex: "F0F0F0"), .black, Color(hex: "D9D9D9")]
     
@@ -19,9 +22,15 @@ struct CanvasSettingsSheet: View {
                 
                 HStack(spacing: 20) {
                     ForEach(CollageViewModel.CanvasRatio.allCases, id: \.self) { ratio in
+                        let isLocked = ratio != .story && !subscriptionManager.isPremium
+                        
                         Button(action: {
-                            withAnimation(.spring()) {
-                                viewModel.setCanvasRatio(ratio)
+                            if isLocked {
+                                showPaywall = true
+                            } else {
+                                withAnimation(.spring()) {
+                                    viewModel.setCanvasRatio(ratio)
+                                }
                             }
                         }) {
                             VStack(spacing: 8) {
@@ -35,6 +44,16 @@ struct CanvasSettingsSheet: View {
                                         .frame(width: 60, height: 60 / (ratio == .story ? 9.0/16.0 : (ratio == .portrait ? 4.0/5.0 : 1.0)) * 0.5)
                                         .aspectRatio(ratio.ratio, contentMode: .fit)
                                         .frame(width: 60, height: 80)
+                                        .overlay(
+                                            ZStack {
+                                                if isLocked {
+                                                    Color.white.opacity(0.6)
+                                                        .cornerRadius(8)
+                                                    Image(systemName: "lock.fill")
+                                                        .foregroundColor(.black)
+                                                }
+                                            }
+                                        )
                                     
                                     if viewModel.canvasRatio == ratio {
                                         Image(systemName: "checkmark.circle.fill")
@@ -45,7 +64,7 @@ struct CanvasSettingsSheet: View {
                                 
                                 Text(ratio.rawValue)
                                     .font(.system(size: 14, weight: .medium))
-                                    .foregroundColor(viewModel.canvasRatio == ratio ? .black : .gray)
+                                    .foregroundColor(viewModel.canvasRatio == ratio ? .black : (isLocked ? .gray.opacity(0.5) : .gray))
                             }
                         }
                     }
@@ -55,6 +74,7 @@ struct CanvasSettingsSheet: View {
             .padding(.horizontal, 20)
             
             VStack(alignment: .leading, spacing: 15) {
+                // ... (rest of background color code remains same)
                 Text("Cor de Fundo")
                     .font(.subheadline)
                     .foregroundColor(.gray)
@@ -89,5 +109,8 @@ struct CanvasSettingsSheet: View {
             .padding(.bottom, 20)
         }
         .presentationDetents([.medium])
+        .sheet(isPresented: $showPaywall) {
+            PaywallView(displayCloseButton: true)
+        }
     }
 }

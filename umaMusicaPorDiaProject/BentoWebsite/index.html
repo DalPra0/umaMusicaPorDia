@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bentô - Legal & Privacy</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Space+Grotesk:wght@600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Decorative Background Stickers -->
+  <img src="assets/sticker_blue.svg" class="decorative-sticker s1" alt="">
+  <img src="assets/sticker_green.svg" class="decorative-sticker s2" alt="">
+  <img src="assets/sticker_yellow.svg" class="decorative-sticker s3" alt="">
+
+  <div class="background-overlay"></div>
+
+  <div class="container">
+    <header class="header">
+      <div class="brand-group">
+        <img src="assets/logo.png" alt="Bentô Logo" class="logo">
+        <h1 class="brand-title">BENTÔ</h1>
+      </div>
+      <nav class="lang-switcher" aria-label="Language selection">
+        <button data-lang="en" class="active">EN</button>
+        <button data-lang="pt">PT</button>
+        <button data-lang="es">ES</button>
+      </nav>
+    </header>
+
+    <main class="main-content">
+      <nav class="tabs" aria-label="Legal documents">
+        <button data-tab="terms" class="tab-btn active" id="tab-terms-btn">Terms of Service</button>
+        <button data-tab="privacy" class="tab-btn" id="tab-privacy-btn">Privacy Policy</button>
+      </nav>
+
+      <article id="content-container" class="content-area">
+        <!-- Content injected by JS -->
+      </article>
+    </main>
+
+    <footer class="footer">
+      <p id="footer-text">© 2026 Bentô App. All rights reserved.</p>
+    </footer>
+  </div>
+  <script src="locales.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
