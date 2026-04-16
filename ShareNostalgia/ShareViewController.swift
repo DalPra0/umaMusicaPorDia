@@ -8,8 +8,10 @@ class ShareViewController: UIViewController {
     
     let supabase = SharedSupabaseClient.shared.client
 
+    private let titleLabel = UILabel()
     private let statusLabel = UILabel()
     private let activityIndicator = UIActivityIndicatorView(style: .large)
+    private let cardView = UIVisualEffectView(effect: UIBlurEffect(style: .systemThickMaterial))
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -18,24 +20,68 @@ class ShareViewController: UIViewController {
     }
 
     private func setupDebugUI() {
-        view.backgroundColor = .systemBackground
-        
-        activityIndicator.center = view.center
-        view.addSubview(activityIndicator)
-        activityIndicator.startAnimating()
-        
-        statusLabel.frame = CGRect(x: 20, y: view.center.y + 40, width: view.bounds.width - 40, height: 60)
+        view.backgroundColor = .systemGroupedBackground
+
+        cardView.translatesAutoresizingMaskIntoConstraints = false
+        cardView.layer.cornerRadius = 24
+        cardView.layer.masksToBounds = true
+        view.addSubview(cardView)
+
+        titleLabel.translatesAutoresizingMaskIntoConstraints = false
+        titleLabel.text = "Importando recorte"
+        titleLabel.textAlignment = .center
+        titleLabel.font = .systemFont(ofSize: 20, weight: .bold)
+        titleLabel.textColor = .label
+
+        statusLabel.translatesAutoresizingMaskIntoConstraints = false
         statusLabel.textAlignment = .center
         statusLabel.numberOfLines = 0
-        statusLabel.font = .systemFont(ofSize: 14, weight: .medium)
-        statusLabel.text = "Iniciando importação..."
-        view.addSubview(statusLabel)
-        
+        statusLabel.font = .systemFont(ofSize: 15, weight: .medium)
+        statusLabel.textColor = .secondaryLabel
+        statusLabel.text = "Preparando importação..."
+
+        let iconView = UIImageView(image: UIImage(systemName: "square.and.arrow.down.on.square.fill"))
+        iconView.translatesAutoresizingMaskIntoConstraints = false
+        iconView.tintColor = .systemBlue
+        iconView.contentMode = .scaleAspectFit
+
+        activityIndicator.translatesAutoresizingMaskIntoConstraints = false
+        activityIndicator.startAnimating()
+
+        let contentStack = UIStackView(arrangedSubviews: [iconView, titleLabel, statusLabel, activityIndicator])
+        contentStack.translatesAutoresizingMaskIntoConstraints = false
+        contentStack.axis = .vertical
+        contentStack.spacing = 14
+        contentStack.alignment = .center
+
+        cardView.contentView.addSubview(contentStack)
+
         let closeButton = UIButton(type: .system)
+        closeButton.translatesAutoresizingMaskIntoConstraints = false
         closeButton.setTitle("Cancelar", for: .normal)
-        closeButton.frame = CGRect(x: 20, y: 50, width: 80, height: 44)
+        closeButton.titleLabel?.font = .systemFont(ofSize: 16, weight: .semibold)
+        closeButton.setTitleColor(.systemBlue, for: .normal)
         closeButton.addTarget(self, action: #selector(cancelTapped), for: .touchUpInside)
         view.addSubview(closeButton)
+
+        NSLayoutConstraint.activate([
+            cardView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
+            cardView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            cardView.leadingAnchor.constraint(greaterThanOrEqualTo: view.leadingAnchor, constant: 20),
+            cardView.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -20),
+            cardView.widthAnchor.constraint(equalToConstant: 320),
+            cardView.heightAnchor.constraint(equalToConstant: 260),
+
+            contentStack.leadingAnchor.constraint(equalTo: cardView.contentView.leadingAnchor, constant: 20),
+            contentStack.trailingAnchor.constraint(equalTo: cardView.contentView.trailingAnchor, constant: -20),
+            contentStack.centerYAnchor.constraint(equalTo: cardView.contentView.centerYAnchor),
+
+            iconView.widthAnchor.constraint(equalToConstant: 56),
+            iconView.heightAnchor.constraint(equalToConstant: 56),
+
+            closeButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 8),
+            closeButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 20)
+        ])
     }
     
     @objc private func cancelTapped() {

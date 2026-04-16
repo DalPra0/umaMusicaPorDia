@@ -10,7 +10,7 @@ struct umaMusicaPorDiaProjectApp: App {
     init() {
         // Inicialização do RevenueCat com a chave real
         Purchases.logLevel = .debug
-        Purchases.configure(withAPIKey: "test_AdqgNewFdBqHYSTisdwQTGbYnjH")
+        Purchases.configure(withAPIKey: "appl_OfnfOEKIAxccbYUvTTnspTWHFbQ")
     }
     
     var body: some Scene {

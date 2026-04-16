@@ -2,10 +2,18 @@ import SwiftUI
 import PhotosUI
 
 struct CollageCreatorView: View {
+    private enum PhotosPickerMode {
+        case asset
+        case canvasBackground
+    }
+
     @State private var viewModel: CollageViewModel
     @State private var selectedItems: [PhotosPickerItem] = []
+    @State private var photosPickerMode: PhotosPickerMode = .asset
+    let dailyWord: DailyWord?
     
-    init(backgroundImageName: String? = nil) {
+    init(backgroundImageName: String? = nil, dailyWord: DailyWord? = nil) {
+        self.dailyWord = dailyWord
         _viewModel = State(initialValue: CollageViewModel(backgroundImageName: backgroundImageName))
     }
     
@@ -14,12 +22,11 @@ struct CollageCreatorView: View {
     @State private var showPinterestAssets = false
     @State private var showPhotosPicker = false
     @State private var showCanvasSettings = false
+    @State private var showStrokeSettings = false
     
     @State private var renderedImage: UIImage?
     @State private var navigateToExport = false
-    
-    @State private var homeViewModel = HomeViewModel()
-    
+
     @Environment(\.dismiss) var dismiss
 
     var body: some View {
@@ -58,6 +65,7 @@ struct CollageCreatorView: View {
         .sheet(isPresented: $showImageSource) {
             ImageSourceSheet(
                 onSelectPhotos: {
+                    photosPickerMode = .asset
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                         showPhotosPicker = true
                     }
@@ -65,6 +73,12 @@ struct CollageCreatorView: View {
                 onSelectPinterest: {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
                         showPinterestAssets = true
+                    }
+                },
+                onSelectBackground: {
+                    photosPickerMode = .canvasBackground
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                        showPhotosPicker = true
                     }
                 }
             )
@@ -75,6 +89,12 @@ struct CollageCreatorView: View {
         }
         .sheet(isPresented: $showCanvasSettings) {
             CanvasSettingsSheet(viewModel: viewModel)
+        }
+        .sheet(isPresented: $showStrokeSettings) {
+            if let selectedItemBinding {
+                StrokeSettingsSheet(item: selectedItemBinding)
+                    .presentationDetents([.medium])
+            }
         }
         .fullScreenCover(isPresented: $viewModel.showBackgroundRefinement) {
             if let id = viewModel.selectedItemId,
@@ -90,6 +110,14 @@ struct CollageCreatorView: View {
         }
         .photosPicker(isPresented: $showPhotosPicker, selection: $selectedItems, matching: .images)
         .onChange(of: selectedItems) { _, _ in loadSelectedImages() }
+        .alert("Erro", isPresented: Binding(
+            get: { viewModel.errorMessage != nil },
+            set: { if !$0 { viewModel.errorMessage = nil } }
+        )) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(viewModel.errorMessage ?? "")
+        }
     }
     
     
@@ -142,7 +170,7 @@ struct CollageCreatorView: View {
                 .tracking(-0.31)
                 .frame(maxWidth: .infinity, alignment: .center)
             
-            Text(homeViewModel.dailyWord?.word.uppercased() ?? "CARREGANDO...")
+            Text(dailyWord?.word.uppercased() ?? "CARREGANDO...")
                 .font(.system(size: 34, weight: .bold))
                 .foregroundStyle(Color(hex: "6759F1"))
                 .tracking(0.4)
@@ -153,24 +181,28 @@ struct CollageCreatorView: View {
     }
     
     private var canvasContainer: some View {
-        RoundedRectangle(cornerRadius: 16)
-            .stroke(Color(hex: "6759F1"), lineWidth: 1)
+        mainCanvas
+            .frame(width: 300, height: 492)
+            .clipShape(RoundedRectangle(cornerRadius: 15))
             .frame(width: 302, height: 494)
-            .background(
+            .overlay {
                 RoundedRectangle(cornerRadius: 16)
-                    .fill(Color.white)
-            )
-            .overlay(alignment: .top) {
-                mainCanvas
-                    .frame(width: 259, height: 412)
-                    .clipped()
-                    .background(viewModel.canvasColor)
-                    .padding(.top, 32)
+                    .stroke(Color(hex: "6759F1"), lineWidth: 1)
             }
     }
     
     private var mainCanvas: some View {
         ZStack {
+            viewModel.canvasColor
+
+            if let backgroundImage = viewModel.canvasBackgroundImage {
+                Image(uiImage: backgroundImage)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .clipped()
+            }
+
             Color.white.opacity(0.001)
                 .onTapGesture {
                     viewModel.selectItem(nil)
@@ -215,9 +247,16 @@ struct CollageCreatorView: View {
                     showImageSource = true
                 }
             }
-            
-            ToolbarButton(title: "Formatos", icon: "crop.rotate") {
-                showCanvasSettings = true
+
+            if viewModel.selectedItemId != nil {
+                ToolbarButton(title: "Contorno", icon: "paintbrush.pointed") {
+                    viewModel.saveState()
+                    showStrokeSettings = true
+                }
+            } else {
+                ToolbarButton(title: "Formatos", icon: "crop.rotate") {
+                    showCanvasSettings = true
+                }
             }
         }
     }
@@ -249,19 +288,53 @@ struct CollageCreatorView: View {
     }
     
     private func loadSelectedImages() {
-        for item in selectedItems {
+        let mode = photosPickerMode
+        let pickedItems = selectedItems
+        selectedItems = []
+        photosPickerMode = .asset
+
+        switch mode {
+        case .asset:
+            for item in pickedItems {
+                Task {
+                    if let data = try? await item.loadTransferable(type: Data.self),
+                       let uiImage = UIImage(data: data) {
+                        await MainActor.run { viewModel.addItem(uiImage) }
+                    }
+                }
+            }
+        case .canvasBackground:
+            guard let first = pickedItems.first else { return }
             Task {
-                if let data = try? await item.loadTransferable(type: Data.self),
+                if let data = try? await first.loadTransferable(type: Data.self),
                    let uiImage = UIImage(data: data) {
-                    await MainActor.run { viewModel.addItem(uiImage) }
+                    await MainActor.run {
+                        viewModel.setCanvasBackgroundImage(uiImage)
+                    }
+                } else {
+                    await MainActor.run {
+                        viewModel.errorMessage = "Não foi possível carregar a imagem de fundo."
+                    }
                 }
             }
         }
-        selectedItems = []
+    }
+
+    private var selectedItemBinding: Binding<CollageItem>? {
+        guard let selectedId = viewModel.selectedItemId,
+              let selectedIndex = viewModel.items.firstIndex(where: { $0.id == selectedId }) else {
+            return nil
+        }
+        return $viewModel.items[selectedIndex]
     }
     
     @MainActor
     private func prepareExport() {
+        guard let wordId = dailyWord?.id else {
+            viewModel.errorMessage = "Palavra do dia indisponível para salvar a colagem."
+            return
+        }
+
         let renderer = ImageRenderer(content: CollageCanvasView(viewModel: viewModel))
         renderer.scale = 3.0
         
@@ -274,7 +347,7 @@ struct CollageCreatorView: View {
             }
             
             Task {
-                await viewModel.saveCollage(wordId: homeViewModel.dailyWord?.id ?? UUID(), image: uiImage, assets: assets)
+                await viewModel.saveCollage(wordId: wordId, image: uiImage, assets: assets)
                 navigateToExport = true
             }
         }

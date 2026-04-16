@@ -14,7 +14,7 @@ final class HomeViewModel {
     var errorMessage: String?
     
     let placeholderWords = ["INFÂNCIA", "AMOR", "VIAGEM", "SONHO", "FESTA", "VERÃO", "AMIGOS", "NOSTALGIA"]
-    private let itemHeight: CGFloat = 80
+    private let itemHeight: CGFloat = 60
     
     init(wordService: WordService = WordService(), authService: AuthService = AuthService()) {
         self.wordService = wordService
@@ -101,7 +101,14 @@ final class HomeViewModel {
         }
     }
     
-    func signOut() async {
-        try? await authService.signOut()
+    @MainActor
+    func signOut() async -> Bool {
+        do {
+            try await authService.signOut()
+            return true
+        } catch {
+            errorMessage = "Não foi possível sair da conta: \(error.localizedDescription)"
+            return false
+        }
     }
 }

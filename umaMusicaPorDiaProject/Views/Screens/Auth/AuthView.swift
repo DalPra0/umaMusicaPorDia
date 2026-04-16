@@ -4,41 +4,52 @@ struct AuthView: View {
     @State private var viewModel = AuthViewModel()
     
     var body: some View {
-        ZStack {
-            Color(hex: "D9D9D9")
-                .ignoresSafeArea()
-            
-            if viewModel.showForm {
+        if viewModel.showForm {
+            ZStack {
+                Color(hex: "D9D9D9")
+                    .ignoresSafeArea()
                 authFormView
-            } else {
-                landingView
             }
+        } else {
+            landingView
         }
     }
     
     private var landingView: some View {
-        VStack(spacing: 0) {
-            Spacer()
+        ZStack(alignment: .top) {
+            Color(hex: "6759F1")
+                .ignoresSafeArea()
             
-            appLogo
+            LinearGradient(
+                colors: [Color(hex: "81E862").opacity(0), Color(hex: "81E862")],
+                startPoint: .top,
+                endPoint: .bottom
+            )
+            .ignoresSafeArea()
+
+            Color.white
+                .frame(height: 50)
+                .ignoresSafeArea(edges: .top)
             
-            Spacer()
-            
-            VStack(spacing: 24) {
-                AppButton(title: "Crie sua conta") {
-                    viewModel.isSignUp = true
-                    viewModel.showForm = true
-                }
+            VStack(spacing: 96) {
+                landingLogo
                 
-                AppButton(title: "Fazer login", style: .secondary) {
-                    viewModel.isSignUp = false
-                    viewModel.showForm = true
+                VStack(spacing: 24) {
+                    landingPrimaryButton(title: "Crie sua conta") {
+                        viewModel.isSignUp = true
+                        viewModel.showForm = true
+                    }
+                    
+                    landingSecondaryButton(title: "Fazer login") {
+                        viewModel.isSignUp = false
+                        viewModel.showForm = true
+                    }
                 }
+                .frame(maxWidth: .infinity)
             }
+            .padding(.top, 246)
             .padding(.horizontal, 20)
-            .padding(.bottom, 60)
         }
-        .padding(30)
     }
     
     private var authFormView: some View {
@@ -76,6 +87,14 @@ struct AuthView: View {
         }
     }
     
+    private var landingLogo: some View {
+        Image("LogoBentoVerde")
+            .resizable()
+            .scaledToFit()
+            .frame(width: 307, height: 159)
+            .shadow(color: .black.opacity(0.18), radius: 6, x: 0, y: 4)
+    }
+    
     private var appLogo: some View {
         RoundedRectangle(cornerRadius: 47)
             .fill(Color(hex: "1E1E1E"))
@@ -101,5 +120,37 @@ struct AuthView: View {
             .font(.system(size: 17, weight: .semibold))
             .foregroundColor(Color(hex: "4A4242"))
             .tracking(-0.43)
+    }
+
+    private func landingPrimaryButton(title: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(.system(size: 18, weight: .bold))
+                .tracking(-0.23)
+                .foregroundStyle(.white)
+                .frame(maxWidth: .infinity)
+                .frame(height: 43)
+                .background(Color(hex: "FC02B2"))
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+        }
+        .shadow(color: .black.opacity(0.13), radius: 5.4, x: 0, y: 4)
+    }
+
+    private func landingSecondaryButton(title: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(.system(size: 18, weight: .bold))
+                .tracking(-0.23)
+                .foregroundStyle(Color(hex: "FC02B2"))
+                .frame(maxWidth: .infinity)
+                .frame(height: 43)
+                .background(Color.clear)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .stroke(Color(hex: "FC02B2"), lineWidth: 4)
+                )
+                .clipShape(RoundedRectangle(cornerRadius: 12))
+        }
+        .shadow(color: .black.opacity(0.25), radius: 4, x: 0, y: 4)
     }
 }

@@ -13,6 +13,7 @@ struct BackgroundRefinementView: View {
     @State private var currentStroke: Stroke?
     
     @State private var scale: CGFloat = 1.0
+    @State private var lastScale: CGFloat = 1.0
     @State private var offset: CGSize = .zero
     
     enum Tool {
@@ -84,7 +85,11 @@ struct BackgroundRefinementView: View {
                         Slider(value: $brushSize, in: 5...100)
                         Image(systemName: "plus")
                         
-                        Button(action: { scale = 1.0; offset = .zero }) {
+                        Button(action: {
+                            scale = 1.0
+                            lastScale = 1.0
+                            offset = .zero
+                        }) {
                             Image(systemName: "arrow.counterclockwise")
                                 .font(.system(size: 20))
                                 .foregroundColor(.black)
@@ -114,7 +119,11 @@ struct BackgroundRefinementView: View {
             .gesture(
                 MagnificationGesture()
                     .onChanged { value in
-                        scale = value
+                        let nextScale = lastScale * value
+                        scale = min(max(nextScale, 1.0), 4.0)
+                    }
+                    .onEnded { _ in
+                        lastScale = scale
                     }
             )
         }

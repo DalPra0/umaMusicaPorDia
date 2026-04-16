@@ -24,6 +24,7 @@ final class CollageViewModel {
     var items: [CollageItem] = []
     var userAssets: [UserAsset] = []
     var canvasColor: Color = .white
+    var canvasBackgroundImage: UIImage?
     var canvasRatio: CanvasRatio = .story
     var selectedItemId: UUID? = nil
     var isSaving = false
@@ -32,8 +33,16 @@ final class CollageViewModel {
     var showBackgroundRefinement = false
     var errorMessage: String?
     
-    private var undoStack: [[CollageItem]] = []
-    private var redoStack: [[CollageItem]] = []
+    private struct EditorState {
+        var items: [CollageItem]
+        var canvasColor: Color
+        var canvasBackgroundImage: UIImage?
+        var canvasRatio: CanvasRatio
+        var selectedItemId: UUID?
+    }
+
+    private var undoStack: [EditorState] = []
+    private var redoStack: [EditorState] = []
     
     var canUndo: Bool { !undoStack.isEmpty }
     var canRedo: Bool { !redoStack.isEmpty }
@@ -67,6 +76,11 @@ final class CollageViewModel {
     func setCanvasColor(_ color: Color) {
         saveState()
         canvasColor = color
+    }
+    
+    func setCanvasBackgroundImage(_ image: UIImage?) {
+        saveState()
+        canvasBackgroundImage = image
     }
     
     @MainActor
@@ -159,20 +173,20 @@ final class CollageViewModel {
     
     func saveState() {
         if undoStack.count > 20 { undoStack.removeFirst() }
-        undoStack.append(items)
+        undoStack.append(currentState)
         redoStack.removeAll()
     }
     
     func undo() {
         guard let lastState = undoStack.popLast() else { return }
-        redoStack.append(items)
-        items = lastState
+        redoStack.append(currentState)
+        apply(state: lastState)
     }
     
     func redo() {
         guard let nextState = redoStack.popLast() else { return }
-        undoStack.append(items)
-        items = nextState
+        undoStack.append(currentState)
+        apply(state: nextState)
     }
     
     func saveCollage(wordId: UUID, image: UIImage, assets: [CollageAsset]) async {
@@ -194,5 +208,23 @@ final class CollageViewModel {
         } catch {
             self.errorMessage = error.localizedDescription
         }
+    }
+
+    private var currentState: EditorState {
+        EditorState(
+            items: items,
+            canvasColor: canvasColor,
+            canvasBackgroundImage: canvasBackgroundImage,
+            canvasRatio: canvasRatio,
+            selectedItemId: selectedItemId
+        )
+    }
+
+    private func apply(state: EditorState) {
+        items = state.items
+        canvasColor = state.canvasColor
+        canvasBackgroundImage = state.canvasBackgroundImage
+        canvasRatio = state.canvasRatio
+        selectedItemId = state.selectedItemId
     }
 }

@@ -6,6 +6,7 @@ struct HomeView: View {
     @State private var viewModel = HomeViewModel()
     @State private var navigateToCollage = false
     @State private var showSettings = false
+    @Environment(SubscriptionManager.self) private var subscriptionManager
     
     var body: some View {
         NavigationStack {
@@ -33,12 +34,23 @@ struct HomeView: View {
                 }
             }
             .navigationDestination(isPresented: $navigateToCollage) {
-                if let word = viewModel.dailyWord?.word {
-                    BasketSelectionView(dailyWord: word)
+                if let dailyWord = viewModel.dailyWord {
+                    BasketSelectionView(dailyWord: dailyWord)
                 }
             }
             .sheet(isPresented: $showSettings) {
                 SettingsSheet(viewModel: viewModel)
+            }
+            .onAppear {
+                subscriptionManager.checkSubscriptionStatus()
+            }
+            .alert("Erro", isPresented: Binding(
+                get: { viewModel.errorMessage != nil },
+                set: { if !$0 { viewModel.errorMessage = nil } }
+            )) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(viewModel.errorMessage ?? "")
             }
         }
     }
@@ -71,10 +83,11 @@ struct HomeView: View {
             Text(buttonTitle)
                 .font(.system(size: 20, weight: .bold))
                 .foregroundColor(.white)
-                .frame(width: 340, height: 50)
+                .frame(maxWidth: .infinity, minHeight: 50, maxHeight: 50)
                 .background(Color(hex: "FC02B2"))
                 .clipShape(RoundedRectangle(cornerRadius: 12))
         }
+        .padding(.horizontal, 24)
         .disabled(viewModel.isSpinning)
     }
     

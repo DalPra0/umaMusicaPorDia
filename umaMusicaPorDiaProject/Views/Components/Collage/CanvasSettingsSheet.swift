@@ -109,7 +109,9 @@ struct CanvasSettingsSheet: View {
             .padding(.bottom, 20)
         }
         .presentationDetents([.medium])
-        .sheet(isPresented: $showPaywall) {
+        .sheet(isPresented: $showPaywall, onDismiss: {
+            subscriptionManager.checkSubscriptionStatus()
+        }) {
             PaywallView(displayCloseButton: true)
         }
     }

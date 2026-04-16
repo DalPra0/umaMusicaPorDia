@@ -4,7 +4,7 @@ struct BasketSelectionView: View {
     @State private var selectedThemeIndex: Int? = BasketTheme.defaultSelectionIndex
     @State private var navigateToNext = false
     @State private var showThemeSettings = false
-    let dailyWord: String
+    let dailyWord: DailyWord
     
     var body: some View {
         GeometryReader { screenGeometry in
@@ -70,13 +70,14 @@ struct BasketSelectionView: View {
                         .font(.system(size: 18, weight: .bold))
                         .tracking(-0.23)
                         .foregroundStyle(Color.white)
-                        .frame(width: 350, height: 43)
+                        .frame(maxWidth: .infinity, minHeight: 43, maxHeight: 43)
                         .background(Color(hex: "FC02B2"))
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
                 .shadow(color: .black.opacity(0.25), radius: 4, x: 0, y: 4)
+                .padding(.horizontal, 20)
                 .padding(.bottom, 52)
-                .accessibilityHint("Abre a próxima etapa para a palavra \(dailyWord)")
+                .accessibilityHint("Abre a próxima etapa para a palavra \(dailyWord.word)")
             }
         }
         .navigationBarBackButtonHidden(true)
@@ -119,9 +120,9 @@ struct BasketSelectionView: View {
     @ViewBuilder
     private func destinationForTheme(_ theme: BasketTheme) -> some View {
         if theme.variants.count > 1 {
-            ColorSelectionView(theme: theme)
+            ColorSelectionView(theme: theme, dailyWord: dailyWord)
         } else {
-            CollageCreatorView(backgroundImageName: theme.previewImageName)
+            CollageCreatorView(backgroundImageName: theme.previewImageName, dailyWord: dailyWord)
         }
     }
 }

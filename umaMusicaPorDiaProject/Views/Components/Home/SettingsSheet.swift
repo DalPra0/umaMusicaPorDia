@@ -48,8 +48,10 @@ struct SettingsSheet: View {
                 Section("Conta") {
                     Button(role: .destructive) {
                         Task {
-                            await viewModel.signOut()
-                            dismiss()
+                            let didSignOut = await viewModel.signOut()
+                            if didSignOut {
+                                dismiss()
+                            }
                         }
                     } label: {
                         Label("Sair da Conta", systemImage: "door.left.hand.open")
@@ -62,11 +64,21 @@ struct SettingsSheet: View {
                     Button("Fechar") { dismiss() }
                 }
             }
-            .sheet(isPresented: $showPaywall) {
+            .sheet(isPresented: $showPaywall, onDismiss: {
+                subscriptionManager.checkSubscriptionStatus()
+            }) {
                 PaywallView(displayCloseButton: true)
             }
             .sheet(isPresented: $showCustomerCenter) {
                 CustomerCenterView()
+            }
+            .alert("Erro", isPresented: Binding(
+                get: { viewModel.errorMessage != nil },
+                set: { if !$0 { viewModel.errorMessage = nil } }
+            )) {
+                Button("OK", role: .cancel) {}
+            } message: {
+                Text(viewModel.errorMessage ?? "")
             }
         }
     }

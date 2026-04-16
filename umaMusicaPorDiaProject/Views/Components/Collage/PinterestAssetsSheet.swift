@@ -132,7 +132,9 @@ struct PinterestAssetsSheet: View {
         .task(id: viewModel.userAssets.count) {
             await viewModel.fetchUserAssets()
         }
-        .sheet(isPresented: $showPaywall) {
+        .sheet(isPresented: $showPaywall, onDismiss: {
+            subscriptionManager.checkSubscriptionStatus()
+        }) {
             PaywallView(displayCloseButton: true)
         }
     }

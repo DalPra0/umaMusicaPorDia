@@ -3,6 +3,7 @@ import RevenueCatUI
 
 struct ColorSelectionView: View {
     let theme: BasketTheme
+    let dailyWord: DailyWord
     @Environment(\.dismiss) var dismiss
     @Environment(SubscriptionManager.self) var subscriptionManager
     @State private var showPaywall = false
@@ -30,40 +31,34 @@ struct ColorSelectionView: View {
                         VStack(spacing: 0) {
                             ForEach(Array(theme.variants.enumerated()), id: \.offset) { index, variant in
                                 let isLocked = index >= 3 && !subscriptionManager.isPremium
-                                
-                                Button(action: {
-                                    if isLocked {
-                                        showPaywall = true
+
+                                if isLocked {
+                                    Button(action: { showPaywall = true }) {
+                                        colorCard(variant)
+                                            .frame(height: itemHeight)
+                                            .overlay(
+                                                VStack(spacing: 12) {
+                                                    Image(systemName: "lock.fill")
+                                                        .font(.system(size: 40))
+                                                        .foregroundColor(.white)
+                                                        .shadow(radius: 4)
+                                                    Text("PREMIUM")
+                                                        .font(.system(size: 14, weight: .bold))
+                                                        .foregroundColor(.white)
+                                                        .tracking(2)
+                                                }
+                                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                                .background(Color.black.opacity(0.15))
+                                            )
                                     }
-                                }) {
-                                    ZStack {
-                                        if isLocked {
-                                            colorCard(variant)
-                                                .frame(height: itemHeight)
-                                                .overlay(
-                                                    VStack(spacing: 12) {
-                                                        Image(systemName: "lock.fill")
-                                                            .font(.system(size: 40))
-                                                            .foregroundColor(.white)
-                                                            .shadow(radius: 4)
-                                                        Text("PREMIUM")
-                                                            .font(.system(size: 14, weight: .bold))
-                                                            .foregroundColor(.white)
-                                                            .tracking(2)
-                                                    }
-                                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                                                    .background(Color.black.opacity(0.15))
-                                                )
-                                        } else {
-                                            NavigationLink(destination: CollageCreatorView(backgroundImageName: variant)) {
-                                                colorCard(variant)
-                                                    .frame(height: itemHeight)
-                                            }
-                                        }
+                                    .buttonStyle(PlainButtonStyle())
+                                } else {
+                                    NavigationLink(destination: CollageCreatorView(backgroundImageName: variant, dailyWord: dailyWord)) {
+                                        colorCard(variant)
+                                            .frame(height: itemHeight)
                                     }
+                                    .buttonStyle(PlainButtonStyle())
                                 }
-                                .buttonStyle(PlainButtonStyle())
-                                .disabled(isLocked && showPaywall)
                             }
                         }
                         .scrollTargetLayout()
@@ -82,7 +77,9 @@ struct ColorSelectionView: View {
             .allowsHitTesting(false)
         }
         .navigationBarHidden(true)
-        .sheet(isPresented: $showPaywall) {
+        .sheet(isPresented: $showPaywall, onDismiss: {
+            subscriptionManager.checkSubscriptionStatus()
+        }) {
             PaywallView(displayCloseButton: true)
         }
     }

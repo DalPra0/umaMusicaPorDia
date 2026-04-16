@@ -4,6 +4,7 @@ struct ImageSourceSheet: View {
     @Environment(\.dismiss) var dismiss
     var onSelectPhotos: () -> Void
     var onSelectPinterest: () -> Void
+    var onSelectBackground: () -> Void
     
     var body: some View {
         VStack(spacing: 0) {
@@ -30,7 +31,7 @@ struct ImageSourceSheet: View {
             .padding(.top, 14)
             .padding(.bottom, 30)
             
-            HStack(spacing: 60) {
+            HStack(spacing: 28) {
                 VStack(spacing: 8) {
                     Button(action: {
                         dismiss()
@@ -60,12 +61,27 @@ struct ImageSourceSheet: View {
                     Text("Pinterest")
                         .font(.system(size: 13, weight: .medium))
                 }
+
+                VStack(spacing: 8) {
+                    Button(action: {
+                        dismiss()
+                        onSelectBackground()
+                    }) {
+                        sourceIconBackground {
+                            Image(systemName: "photo.on.rectangle.angled")
+                                .font(.system(size: 40))
+                                .foregroundColor(.black)
+                        }
+                    }
+                    Text("Fundo")
+                        .font(.system(size: 13, weight: .medium))
+                }
             }
             .padding(.bottom, 40)
             
             Spacer()
         }
-        .presentationDetents([.height(250)])
+        .presentationDetents([.height(280)])
         .presentationDragIndicator(.hidden)
     }
     
