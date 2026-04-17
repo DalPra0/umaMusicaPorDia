@@ -27,6 +27,8 @@ struct AuthView: View {
             )
             .ignoresSafeArea()
             
+            text("oi")
+            
             VStack(spacing: 96) {
                 landingLogo
                 
