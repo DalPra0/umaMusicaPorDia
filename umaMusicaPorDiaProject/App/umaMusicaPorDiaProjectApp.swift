@@ -8,7 +8,6 @@ struct umaMusicaPorDiaProjectApp: App {
     @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
     
     init() {
-        // Inicialização do RevenueCat com a chave real
         Purchases.logLevel = .debug
         Purchases.configure(withAPIKey: "appl_OfnfOEKIAxccbYUvTTnspTWHFbQ")
     }
