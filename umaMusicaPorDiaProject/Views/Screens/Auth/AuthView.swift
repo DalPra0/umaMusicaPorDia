@@ -26,10 +26,6 @@ struct AuthView: View {
                 endPoint: .bottom
             )
             .ignoresSafeArea()
-
-            Color.white
-                .frame(height: 50)
-                .ignoresSafeArea(edges: .top)
             
             VStack(spacing: 96) {
                 landingLogo
