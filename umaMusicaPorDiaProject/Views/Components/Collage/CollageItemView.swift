@@ -65,10 +65,17 @@ struct CollageItemView: View {
         .rotationEffect(item.rotation)
         .scaleEffect(item.scale)
         .offset(item.offset)
+        .shadow(
+            color: item.isBasket ? .black.opacity(0.12) : .clear,
+            radius: item.isBasket ? 4 : 0,
+            x: 0,
+            y: item.isBasket ? 2 : 0
+        )
         .simultaneousGesture(
             TapGesture()
                 .onEnded { _ in
                     onSelect()
+                    HapticsManager.shared.playSelection()
                 }
         )
         .gesture(
@@ -84,6 +91,7 @@ struct CollageItemView: View {
                     guard isSelected else { return }
                     item.lastOffset = item.offset
                     onInteractionEnded()
+                    HapticsManager.shared.playRelease()
                 }
         )
         .gesture(
@@ -96,6 +104,7 @@ struct CollageItemView: View {
                     guard isSelected else { return }
                     item.lastScale = item.scale
                     onInteractionEnded()
+                    HapticsManager.shared.playRelease()
                 }
                 .simultaneously(with: RotationGesture()
                     .onChanged { value in
@@ -106,6 +115,7 @@ struct CollageItemView: View {
                         guard isSelected else { return }
                         item.lastRotation = item.rotation
                         onInteractionEnded()
+                        HapticsManager.shared.playRelease()
                     }
                 )
         )

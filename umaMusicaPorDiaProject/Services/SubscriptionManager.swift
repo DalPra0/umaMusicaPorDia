@@ -38,6 +38,30 @@ class SubscriptionManager {
             self?.updatePremiumStatus(from: customerInfo)
         }
     }
+
+    // Sincroniza o usuário do Supabase com o RevenueCat
+    func sync(withUserID userID: UUID?) {
+        if let userID = userID {
+            let appUserID = userID.uuidString
+            Purchases.shared.logIn(appUserID) { [weak self] (customerInfo, created, error) in
+                if let error = error {
+                    print("ERROR: Falha ao logar no RevenueCat: \(error.localizedDescription)")
+                } else {
+                    print("DEBUG: RevenueCat logado com ID: \(appUserID) (Novo: \(created))")
+                    self?.updatePremiumStatus(from: customerInfo)
+                }
+            }
+        } else {
+            Purchases.shared.logOut { [weak self] (customerInfo, error) in
+                if let error = error {
+                    print("ERROR: Falha ao deslogar do RevenueCat: \(error.localizedDescription)")
+                } else {
+                    print("DEBUG: RevenueCat deslogado")
+                    self?.updatePremiumStatus(from: customerInfo)
+                }
+            }
+        }
+    }
     
     // Busca os preços e pacotes (monthly, three_month, yearly)
     func fetchOfferings() {

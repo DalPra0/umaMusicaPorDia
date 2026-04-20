@@ -1,4 +1,5 @@
 import SwiftUI
+import UIKit
 
 struct BasketTheme: Identifiable {
     let id = UUID()
@@ -8,6 +9,36 @@ struct BasketTheme: Identifiable {
     
     var previewImageName: String {
         variants.first ?? ""
+    }
+
+    var whiteAssetName: String? {
+        let preferredWhiteAsset = "\(folderName)White"
+        if UIImage(named: preferredWhiteAsset) != nil {
+            return preferredWhiteAsset
+        }
+        return nil
+    }
+
+    var supportsCustomColorSelection: Bool {
+        whiteAssetName != nil
+    }
+
+    var variantOptions: [BasketVariantOption] {
+        variants.map { assetName in
+            BasketVariantOption(
+                assetName: assetName,
+                title: displayName(for: assetName),
+                swatchHex: BasketVariantPalette.hex(for: assetName)
+            )
+        }
+    }
+
+    private func displayName(for assetName: String) -> String {
+        let knownColors = ["Blue", "Green", "Pink", "Red", "Yellow", "Purple", "Beige"]
+        if let color = knownColors.first(where: { assetName.localizedCaseInsensitiveContains($0) }) {
+            return color
+        }
+        return name
     }
 }
 

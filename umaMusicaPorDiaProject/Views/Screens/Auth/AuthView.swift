@@ -5,10 +5,14 @@ struct AuthView: View {
     
     var body: some View {
         if viewModel.showForm {
-            ZStack {
-                Color(hex: "D9D9D9")
-                    .ignoresSafeArea()
-                authFormView
+            if viewModel.isSignUp {
+                createAccountView
+            } else {
+                ZStack {
+                    Color(hex: "D9D9D9")
+                        .ignoresSafeArea()
+                    loginFormView
+                }
             }
         } else {
             landingView
@@ -49,38 +53,158 @@ struct AuthView: View {
         }
     }
     
-    private var authFormView: some View {
-        VStack(spacing: 60) {
-            headerWithBack
-            
-            appLogo
-            
-            VStack(alignment: .leading, spacing: 24) {
-                formTitle
-                
-                VStack(spacing: 18) {
-                    if viewModel.isSignUp {
-                        AppTextField(label: "usuário", placeholder: "@lunchbox", text: $viewModel.username)
+    private var loginFormView: some View {
+        GeometryReader { geometry in
+            ZStack(alignment: .top) {
+                Color(hex: "81E862")
+                    .ignoresSafeArea()
+
+                LinearGradient(
+                    colors: [Color(hex: "6759F1").opacity(0), Color(hex: "6759F1")],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .frame(height: max(420, geometry.size.height * 0.72))
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                .ignoresSafeArea(edges: .bottom)
+
+                Color.white
+                    .frame(height: 50)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    .ignoresSafeArea(edges: .top)
+
+                VStack(spacing: 0) {
+                    Spacer()
+                        .frame(height: 110)
+
+                    Image("LogoBentoAmarelo")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 331, height: 159)
+                        .shadow(color: .black.opacity(0.18), radius: 6, x: 0, y: 4)
+
+                    Spacer()
+                        .frame(height: 45)
+
+                    VStack(alignment: .leading, spacing: 18) {
+                        Text("faça login em sua conta")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(Color(hex: "FC02B2"))
+                            .tracking(-0.43)
+
+                        createAccountField(label: "email", placeholder: "123@icloud.com", text: $viewModel.email)
+                        createAccountField(label: "senha", placeholder: "********", text: $viewModel.password, isSecure: true)
+
+                        if let error = viewModel.errorMessage {
+                            Text(error)
+                                .font(.caption)
+                                .foregroundStyle(.red)
+                                .padding(.top, -6)
+                        }
+
+                        Button {
+                            Task { await viewModel.handleAuth() }
+                        } label: {
+                            Text("Criar")
+                                .font(.system(size: 18, weight: .bold))
+                                .foregroundStyle(.white)
+                                .tracking(-0.23)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 43)
+                                .background(Color(hex: "FC02B2"))
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                        }
+                        .disabled(viewModel.isLoading)
+                        .overlay {
+                            if viewModel.isLoading {
+                                ProgressView()
+                                    .tint(.white)
+                            }
+                        }
                     }
-                    
-                    AppTextField(label: "email", placeholder: "123@icloud.com", text: $viewModel.email)
-                    
-                    AppTextField(label: "senha", placeholder: "********", text: $viewModel.password, isSecure: true)
-                }
-                
-                if let error = viewModel.errorMessage {
-                    Text(error)
-                        .font(.caption)
-                        .foregroundColor(.red)
-                }
-                
-                AppButton(title: viewModel.isSignUp ? "Criar" : "Entrar", isLoading: viewModel.isLoading) {
-                    Task { await viewModel.handleAuth() }
+                    .padding(.horizontal, 20)
+
+                    Spacer()
                 }
             }
-            .padding(.horizontal, 20)
-            
-            Spacer()
+        }
+    }
+
+    private var createAccountView: some View {
+        GeometryReader { geometry in
+            ZStack(alignment: .top) {
+                Color(hex: "81E862")
+                    .ignoresSafeArea()
+
+                LinearGradient(
+                    colors: [Color(hex: "6759F1").opacity(0), Color(hex: "6759F1")],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .frame(height: max(420, geometry.size.height * 0.72))
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                .ignoresSafeArea(edges: .bottom)
+
+                Color.white
+                    .frame(height: 50)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    .ignoresSafeArea(edges: .top)
+
+                VStack(spacing: 0) {
+                    Spacer()
+                        .frame(height: 110)
+
+                    Image("LogoBentoRosa")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 307, height: 159)
+                        .shadow(color: .black.opacity(0.18), radius: 6, x: 0, y: 4)
+
+                    Spacer()
+                        .frame(height: 72)
+
+                    VStack(alignment: .leading, spacing: 14) {
+                        Text("crie sua conta")
+                            .font(.system(size: 16, weight: .bold))
+                            .foregroundStyle(Color(hex: "FC02B2"))
+                            .tracking(-0.43)
+
+                        createAccountField(label: "usuário", placeholder: "@lunchbox", text: $viewModel.username)
+                        createAccountField(label: "email", placeholder: "123@icloud.com", text: $viewModel.email)
+                        createAccountField(label: "senha", placeholder: "********", text: $viewModel.password, isSecure: true)
+
+                        if let error = viewModel.errorMessage {
+                            Text(error)
+                                .font(.caption)
+                                .foregroundStyle(.red)
+                                .padding(.top, 4)
+                        }
+
+                        Button {
+                            Task { await viewModel.handleAuth() }
+                        } label: {
+                            Text("Criar")
+                                .font(.system(size: 18, weight: .bold))
+                                .foregroundStyle(.white)
+                                .tracking(-0.23)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 43)
+                                .background(Color(hex: "FC02B2"))
+                                .clipShape(RoundedRectangle(cornerRadius: 12))
+                        }
+                        .disabled(viewModel.isLoading)
+                        .overlay {
+                            if viewModel.isLoading {
+                                ProgressView()
+                                    .tint(.white)
+                            }
+                        }
+                    }
+                    .padding(.horizontal, 20)
+
+                    Spacer()
+                }
+            }
         }
     }
     
@@ -149,5 +273,36 @@ struct AuthView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 12))
         }
         .shadow(color: .black.opacity(0.25), radius: 4, x: 0, y: 4)
+    }
+
+    private func createAccountField(
+        label: String,
+        placeholder: String,
+        text: Binding<String>,
+        isSecure: Bool = false
+    ) -> some View {
+        HStack {
+            Text(label)
+                .font(.system(size: 17))
+                .foregroundStyle(.black)
+                .frame(width: 100, alignment: .leading)
+
+            if isSecure {
+                SecureField(placeholder, text: text)
+                    .font(.system(size: 17))
+                    .foregroundStyle(Color.black.opacity(0.35))
+                    .textInputAutocapitalization(.never)
+            } else {
+                TextField(placeholder, text: text)
+                    .font(.system(size: 17))
+                    .foregroundStyle(Color.black.opacity(0.35))
+                    .textInputAutocapitalization(.never)
+                    .autocorrectionDisabled(true)
+            }
+        }
+        .padding(.horizontal, 16)
+        .frame(height: 45)
+        .background(Color(hex: "D8FFCC"))
+        .clipShape(RoundedRectangle(cornerRadius: 12))
     }
 }

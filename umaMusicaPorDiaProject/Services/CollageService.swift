@@ -54,4 +54,21 @@ final class CollageService {
             
         return try JSONDecoder().decode([UserAsset].self, from: response.data)
     }
+
+    func hasCollage(userId: UUID, wordId: UUID) async throws -> Bool {
+        struct CollageIdentifier: Decodable {
+            let id: UUID
+        }
+
+        let response = try await client
+            .from("collages")
+            .select("id")
+            .eq("user_id", value: userId.uuidString)
+            .eq("word_id", value: wordId.uuidString)
+            .limit(1)
+            .execute()
+
+        let collages = try JSONDecoder().decode([CollageIdentifier].self, from: response.data)
+        return !collages.isEmpty
+    }
 }

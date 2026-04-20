@@ -37,7 +37,30 @@ struct CollageCanvasView: View {
                 .rotationEffect(item.rotation)
                 .scaleEffect(item.scale)
                 .offset(item.offset)
+                .shadow(
+                    color: item.isBasket ? .black.opacity(0.12) : .clear,
+                    radius: item.isBasket ? 4 : 0,
+                    x: 0,
+                    y: item.isBasket ? 2 : 0
+                )
             }
+
+            VStack(spacing: 4) {
+                Text("Feito com")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(Color.black.opacity(0.75))
+
+                Image("LogoBentoVerde")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 84, height: 36)
+            }
+            .padding(.horizontal, 12)
+            .padding(.vertical, 8)
+            .background(Color.white.opacity(0.7))
+            .clipShape(RoundedRectangle(cornerRadius: 10))
+            .frame(maxHeight: .infinity, alignment: .bottom)
+            .padding(.bottom, 16)
         }
         .frame(width: 1080/3, height: 1920/3)
     }

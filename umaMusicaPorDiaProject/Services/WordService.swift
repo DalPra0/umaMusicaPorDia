@@ -27,4 +27,22 @@ final class WordService {
     func refreshDailyWord() async throws {
         try await client.rpc("generate_daily_word").execute()
     }
+
+    func fetchWordPool(limit: Int = 40) async throws -> [String] {
+        struct WordRow: Decodable {
+            let word: String
+        }
+
+        let response = try await client
+            .from("daily_words")
+            .select("word")
+            .order("created_at", ascending: false)
+            .limit(limit)
+            .execute()
+
+        let rows = try JSONDecoder().decode([WordRow].self, from: response.data)
+        return rows
+            .map { $0.word.trimmingCharacters(in: .whitespacesAndNewlines).uppercased() }
+            .filter { !$0.isEmpty }
+    }
 }

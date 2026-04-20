@@ -5,6 +5,7 @@ struct SettingsSheet: View {
     let viewModel: HomeViewModel
     @Environment(\.dismiss) var dismiss
     @Environment(SubscriptionManager.self) var subscriptionManager
+    @AppStorage("haptics.level") private var hapticsLevelRawValue = HapticsManager.Level.medium.rawValue
     @State private var showPaywall = false
     @State private var showCustomerCenter = false
     
@@ -57,6 +58,15 @@ struct SettingsSheet: View {
                         Label("Sair da Conta", systemImage: "door.left.hand.open")
                     }
                 }
+
+                Section("Háptico") {
+                    Picker("Intensidade", selection: $hapticsLevelRawValue) {
+                        ForEach(HapticsManager.Level.allCases) { level in
+                            Text(level.title).tag(level.rawValue)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+                }
             }
             .navigationTitle("Configurações")
             .toolbar {
@@ -79,6 +89,14 @@ struct SettingsSheet: View {
                 Button("OK", role: .cancel) {}
             } message: {
                 Text(viewModel.errorMessage ?? "")
+            }
+            .onAppear {
+                HapticsManager.shared.level = HapticsManager.Level(rawValue: hapticsLevelRawValue) ?? .medium
+            }
+            .onChange(of: hapticsLevelRawValue) { _, newValue in
+                let level = HapticsManager.Level(rawValue: newValue) ?? .medium
+                HapticsManager.shared.level = level
+                HapticsManager.shared.playSelection()
             }
         }
     }

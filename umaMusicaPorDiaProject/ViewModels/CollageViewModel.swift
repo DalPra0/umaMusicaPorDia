@@ -47,11 +47,40 @@ final class CollageViewModel {
     var canUndo: Bool { !undoStack.isEmpty }
     var canRedo: Bool { !redoStack.isEmpty }
     
-    init(collageService: CollageService = CollageService(), authService: AuthService = AuthService(), backgroundImageName: String? = nil) {
+    init(
+        collageService: CollageService = CollageService(),
+        authService: AuthService = AuthService(),
+        backgroundImageName: String? = nil,
+        basketConfiguration: BasketConfiguration? = nil
+    ) {
         self.collageService = collageService
         self.authService = authService
-        
-        if let imageName = backgroundImageName, let uiImage = UIImage(named: imageName) {
+
+        if let basketConfiguration {
+            let basketImage: UIImage?
+            if basketConfiguration.allowsCustomTint, let tintColor = basketConfiguration.tintColor {
+                basketImage = BasketImageRenderer.tintedImage(
+                    assetName: basketConfiguration.baseAssetName,
+                    tintColor: UIColor(tintColor)
+                )
+            } else {
+                basketImage = UIImage(named: basketConfiguration.baseAssetName)
+            }
+
+            if let basketImage {
+            let basketItem = CollageItem(
+                image: basketImage,
+                originalImage: basketImage,
+                isBasket: true,
+                basketBaseAssetName: basketConfiguration.baseAssetName,
+                basketThemeFolderName: basketConfiguration.themeFolderName,
+                basketSupportsCustomTint: basketConfiguration.allowsCustomTint,
+                basketVariantAssetNames: basketConfiguration.variantAssetNames,
+                basketTintHex: basketConfiguration.tintHex
+            )
+            items.append(basketItem)
+            }
+        } else if let imageName = backgroundImageName, let uiImage = UIImage(named: imageName) {
             let newItem = CollageItem(image: uiImage)
             items.append(newItem)
         }
@@ -62,6 +91,9 @@ final class CollageViewModel {
         let newItem = CollageItem(image: image)
         items.append(newItem)
         selectedItemId = newItem.id
+        Task { @MainActor in
+            HapticsManager.shared.playRelease()
+        }
     }
     
     func selectItem(_ id: UUID?) {
@@ -81,6 +113,88 @@ final class CollageViewModel {
     func setCanvasBackgroundImage(_ image: UIImage?) {
         saveState()
         canvasBackgroundImage = image
+    }
+
+    var isSelectedItemBasket: Bool {
+        guard let selectedItem = items.first(where: { $0.id == selectedItemId }) else { return false }
+        return selectedItem.isBasket
+    }
+
+    var selectedBasketSupportsCustomTint: Bool {
+        guard let selectedItem = items.first(where: { $0.id == selectedItemId }) else { return false }
+        return selectedItem.isBasket && selectedItem.basketSupportsCustomTint
+    }
+
+    var selectedBasketVariantOptions: [BasketVariantOption] {
+        guard let selectedItem = items.first(where: { $0.id == selectedItemId }),
+              selectedItem.isBasket,
+              let variants = selectedItem.basketVariantAssetNames else {
+            return []
+        }
+
+        return variants.map { assetName in
+            BasketVariantOption(
+                assetName: assetName,
+                title: basketVariantTitle(from: assetName),
+                swatchHex: BasketVariantPalette.hex(for: assetName)
+            )
+        }
+    }
+
+    var selectedBasketVariantAssetName: String? {
+        guard let selectedItem = items.first(where: { $0.id == selectedItemId }),
+              selectedItem.isBasket else {
+            return nil
+        }
+        return selectedItem.basketBaseAssetName
+    }
+
+    var selectedBasketColor: Color? {
+        guard let selectedItem = items.first(where: { $0.id == selectedItemId }),
+              selectedItem.isBasket,
+              selectedItem.basketSupportsCustomTint,
+              let tintHex = selectedItem.basketTintHex else {
+            return nil
+        }
+        return Color(hex: tintHex)
+    }
+
+    func updateSelectedBasketColor(to color: Color) {
+        guard let id = selectedItemId,
+              let index = items.firstIndex(where: { $0.id == id }),
+              items[index].isBasket,
+              items[index].basketSupportsCustomTint,
+              let baseAssetName = items[index].basketBaseAssetName else {
+            return
+        }
+
+        let tintHex = color.toHex() ?? items[index].basketTintHex ?? BasketConfiguration.defaultTintHex
+        guard let tintedImage = BasketImageRenderer.tintedImage(
+            assetName: baseAssetName,
+            tintColor: UIColor(color)
+        ) else {
+            errorMessage = "Não foi possível atualizar a cor da cesta."
+            return
+        }
+
+        items[index].image = tintedImage
+        items[index].originalImage = tintedImage
+        items[index].basketTintHex = tintHex
+    }
+
+    func updateSelectedBasketVariant(to assetName: String) {
+        guard let id = selectedItemId,
+              let index = items.firstIndex(where: { $0.id == id }),
+              items[index].isBasket,
+              !items[index].basketSupportsCustomTint,
+              let uiImage = UIImage(named: assetName) else {
+            return
+        }
+
+        items[index].image = uiImage
+        items[index].originalImage = uiImage
+        items[index].basketBaseAssetName = assetName
+        items[index].basketTintHex = nil
     }
     
     @MainActor
@@ -205,6 +319,7 @@ final class CollageViewModel {
         
         do {
             try await collageService.saveCollage(userId: userId, wordId: wordId, imageData: compressedData, assets: assets)
+            await NotificationManager.shared.markCollageAsCreatedToday()
         } catch {
             self.errorMessage = error.localizedDescription
         }
@@ -226,5 +341,13 @@ final class CollageViewModel {
         canvasBackgroundImage = state.canvasBackgroundImage
         canvasRatio = state.canvasRatio
         selectedItemId = state.selectedItemId
+    }
+
+    private func basketVariantTitle(from assetName: String) -> String {
+        let knownColors = ["Blue", "Green", "Pink", "Red", "Yellow", "Purple", "Beige"]
+        if let color = knownColors.first(where: { assetName.localizedCaseInsensitiveContains($0) }) {
+            return color
+        }
+        return "Original"
     }
 }

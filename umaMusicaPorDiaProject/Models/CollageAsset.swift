@@ -7,4 +7,6 @@ struct CollageAsset: Codable {
     let scale: Double
     let rotation: Double
     let type: String
+    let sourceAssetName: String?
+    let tintHex: String?
 }

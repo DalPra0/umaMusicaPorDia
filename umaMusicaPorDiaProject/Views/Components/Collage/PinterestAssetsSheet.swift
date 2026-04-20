@@ -1,5 +1,6 @@
 import SwiftUI
 import RevenueCatUI
+import UIKit
 
 struct PinterestAssetsSheet: View {
     @Environment(\.dismiss) var dismiss
@@ -26,17 +27,6 @@ struct PinterestAssetsSheet: View {
                     .tracking(-0.45)
                 
                 Spacer()
-                
-                Button(action: {
-                    Task {
-                        await viewModel.fetchUserAssets()
-                    }
-                }) {
-                    Image(systemName: "arrow.clockwise")
-                        .font(.system(size: 20))
-                        .foregroundStyle(.gray)
-                }
-                .padding(.trailing, 12)
                 
                 Button(action: { dismiss() }) {
                     Image(systemName: "xmark.circle.fill")
@@ -129,8 +119,13 @@ struct PinterestAssetsSheet: View {
             
             Spacer()
         }
-        .task(id: viewModel.userAssets.count) {
+        .task {
             await viewModel.fetchUserAssets()
+        }
+        .task {
+            for await _ in NotificationCenter.default.notifications(named: UIApplication.willEnterForegroundNotification) {
+                await viewModel.fetchUserAssets()
+            }
         }
         .sheet(isPresented: $showPaywall, onDismiss: {
             subscriptionManager.checkSubscriptionStatus()

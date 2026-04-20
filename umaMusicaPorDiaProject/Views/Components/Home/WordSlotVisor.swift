@@ -2,11 +2,11 @@ import SwiftUI
 
 struct WordSlotVisor: View {
     let viewModel: HomeViewModel
-    private let itemHeight: CGFloat = 60 // Altura menor para caberem mais palavras
+    private let itemHeight: CGFloat = 60
+    private let visorHeight: CGFloat = 220
     
     var body: some View {
         ZStack {
-            // Fundo Branco e Borda Rosa Choque do Visor Gacha (Formato Pílula)
             RoundedRectangle(cornerRadius: 45)
                 .fill(Color.white)
                 .frame(width: 200, height: 240)
@@ -15,20 +15,19 @@ struct WordSlotVisor: View {
                         .stroke(Color(hex: "FC02B2"), lineWidth: 10)
                 )
             
-            // Área de Texto Giratório (Mostra 3 palavras ao mesmo tempo)
             VStack(spacing: 0) {
-                // Palavras antes
-                ForEach(viewModel.placeholderWords, id: \.self) { word in
+                ForEach(Array(viewModel.slotWords.enumerated()), id: \.offset) { _, word in
                     wordText(word)
                 }
-                
-                // Palavra atual
-                wordText(viewModel.dailyWord?.word.uppercased() ?? "SORTEAR")
             }
-            .offset(y: viewModel.wordsOffset + 90) // Centraliza a palavra do meio
-            .frame(width: 180, height: 220, alignment: .top)
+            .offset(y: viewModel.wordsOffset + centerOffset)
+            .frame(width: 180, height: visorHeight, alignment: .top)
             .clipped()
         }
+    }
+
+    private var centerOffset: CGFloat {
+        (visorHeight - itemHeight) / 2
     }
     
     private func wordText(_ text: String) -> some View {

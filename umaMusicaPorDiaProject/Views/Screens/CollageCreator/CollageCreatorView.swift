@@ -1,5 +1,6 @@
 import SwiftUI
 import PhotosUI
+import UIKit
 
 struct CollageCreatorView: View {
     private enum PhotosPickerMode {
@@ -12,9 +13,14 @@ struct CollageCreatorView: View {
     @State private var photosPickerMode: PhotosPickerMode = .asset
     let dailyWord: DailyWord?
     
-    init(backgroundImageName: String? = nil, dailyWord: DailyWord? = nil) {
+    init(backgroundImageName: String? = nil, basketConfiguration: BasketConfiguration? = nil, dailyWord: DailyWord? = nil) {
         self.dailyWord = dailyWord
-        _viewModel = State(initialValue: CollageViewModel(backgroundImageName: backgroundImageName))
+        _viewModel = State(
+            initialValue: CollageViewModel(
+                backgroundImageName: backgroundImageName,
+                basketConfiguration: basketConfiguration
+            )
+        )
     }
     
     @State private var showLayers = false
@@ -23,6 +29,8 @@ struct CollageCreatorView: View {
     @State private var showPhotosPicker = false
     @State private var showCanvasSettings = false
     @State private var showStrokeSettings = false
+    @State private var showBasketColorSettings = false
+    @State private var showBasketVariantSettings = false
     
     @State private var renderedImage: UIImage?
     @State private var navigateToExport = false
@@ -96,6 +104,21 @@ struct CollageCreatorView: View {
                     .presentationDetents([.medium])
             }
         }
+        .sheet(isPresented: $showBasketColorSettings) {
+            if let selectedBasketColorBinding {
+                BasketColorSettingsSheet(selectedColor: selectedBasketColorBinding)
+                    .presentationDetents([.medium, .large])
+            }
+        }
+        .sheet(isPresented: $showBasketVariantSettings) {
+            if let selectedBasketVariantBinding {
+                BasketVariantSettingsSheet(
+                    options: viewModel.selectedBasketVariantOptions,
+                    selectedVariantAssetName: selectedBasketVariantBinding
+                )
+                .presentationDetents([.medium])
+            }
+        }
         .fullScreenCover(isPresented: $viewModel.showBackgroundRefinement) {
             if let id = viewModel.selectedItemId,
                let item = viewModel.items.first(where: { $0.id == id }) {
@@ -109,6 +132,14 @@ struct CollageCreatorView: View {
             }
         }
         .photosPicker(isPresented: $showPhotosPicker, selection: $selectedItems, matching: .images)
+        .task {
+            await viewModel.fetchUserAssets()
+        }
+        .task {
+            for await _ in NotificationCenter.default.notifications(named: UIApplication.willEnterForegroundNotification) {
+                await viewModel.fetchUserAssets()
+            }
+        }
         .onChange(of: selectedItems) { _, _ in loadSelectedImages() }
         .alert("Erro", isPresented: Binding(
             get: { viewModel.errorMessage != nil },
@@ -232,16 +263,27 @@ struct CollageCreatorView: View {
             
             if let selectedId = viewModel.selectedItemId,
                let item = viewModel.items.first(where: { $0.id == selectedId }) {
-                ToolbarButton(
-                    title: "Fundo",
-                    icon: item.isBackgroundRemoved ? "wand.and.stars" : "photo.on.rectangle.angled",
-                    isLoading: viewModel.isProcessing
-                ) {
-                    Task {
-                        await viewModel.removeBackgroundOfSelectedItem()
+                if item.isBasket {
+                    ToolbarButton(title: "Cor", icon: "paintpalette") {
+                        viewModel.saveState()
+                        if viewModel.selectedBasketSupportsCustomTint {
+                            showBasketColorSettings = true
+                        } else {
+                            showBasketVariantSettings = true
+                        }
                     }
+                } else {
+                    ToolbarButton(
+                        title: "Fundo",
+                        icon: item.isBackgroundRemoved ? "wand.and.stars" : "photo.on.rectangle.angled",
+                        isLoading: viewModel.isProcessing
+                    ) {
+                        Task {
+                            await viewModel.removeBackgroundOfSelectedItem()
+                        }
+                    }
+                    .disabled(viewModel.isProcessing)
                 }
-                .disabled(viewModel.isProcessing)
             } else {
                 ToolbarButton(title: "Fundo", icon: "photo.on.rectangle.angled") {
                     showImageSource = true
@@ -327,6 +369,30 @@ struct CollageCreatorView: View {
         }
         return $viewModel.items[selectedIndex]
     }
+
+    private var selectedBasketColorBinding: Binding<Color>? {
+        guard viewModel.isSelectedItemBasket, viewModel.selectedBasketSupportsCustomTint else { return nil }
+        let fallbackColor = viewModel.selectedBasketColor ?? Color(hex: BasketConfiguration.defaultTintHex)
+
+        return Binding(
+            get: { viewModel.selectedBasketColor ?? fallbackColor },
+            set: { newColor in
+                viewModel.updateSelectedBasketColor(to: newColor)
+            }
+        )
+    }
+
+    private var selectedBasketVariantBinding: Binding<String>? {
+        guard viewModel.isSelectedItemBasket, !viewModel.selectedBasketSupportsCustomTint else { return nil }
+        guard let currentAssetName = viewModel.selectedBasketVariantAssetName else { return nil }
+
+        return Binding(
+            get: { viewModel.selectedBasketVariantAssetName ?? currentAssetName },
+            set: { newAssetName in
+                viewModel.updateSelectedBasketVariant(to: newAssetName)
+            }
+        )
+    }
     
     @MainActor
     private func prepareExport() {
@@ -342,8 +408,16 @@ struct CollageCreatorView: View {
             self.renderedImage = uiImage
             
             let assets = viewModel.items.map { item in
-                CollageAsset(id: item.id.uuidString, x: Double(item.offset.width), y: Double(item.offset.height),
-                             scale: Double(item.scale), rotation: item.rotation.degrees, type: "image")
+                CollageAsset(
+                    id: item.id.uuidString,
+                    x: Double(item.offset.width),
+                    y: Double(item.offset.height),
+                    scale: Double(item.scale),
+                    rotation: item.rotation.degrees,
+                    type: "image",
+                    sourceAssetName: item.basketBaseAssetName,
+                    tintHex: item.basketTintHex
+                )
             }
             
             Task {
