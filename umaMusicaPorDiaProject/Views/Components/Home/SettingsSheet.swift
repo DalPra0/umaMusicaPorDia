@@ -23,7 +23,18 @@ struct SettingsSheet: View {
                         .foregroundColor(.blue)
                     } else {
                         Button {
-                            showPaywall = true
+                            Task {
+                                let canOpenPaywall = await subscriptionManager.preparePaywall()
+                                if canOpenPaywall {
+                                    showPaywall = true
+                                } else {
+                                    viewModel.errorMessage = """
+                                    Não foi possível carregar os planos agora.
+                                    Verifique os produtos no App Store Connect e RevenueCat.
+                                    Detalhe: \(subscriptionManager.offeringsErrorMessage ?? "sem detalhes")
+                                    """
+                                }
+                            }
                         } label: {
                             HStack {
                                 Label("Seja Premium", systemImage: "star.fill")
