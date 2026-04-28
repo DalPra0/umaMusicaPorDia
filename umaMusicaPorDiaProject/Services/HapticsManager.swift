@@ -49,6 +49,7 @@ final class HapticsManager {
 
     init(userDefaults: UserDefaults = .standard) {
         self.userDefaults = userDefaults
+        userDefaults.register(defaults: [Keys.level: Level.medium.rawValue])
     }
 
     var level: Level {

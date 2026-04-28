@@ -52,7 +52,7 @@ enum BasketVariantPalette {
 
 enum BasketColorAccessPolicy {
     // Troque para true quando quiser que personalização de cor seja premium.
-    static var customColorRequiresPremium = false
+    static var customColorRequiresPremium = true
 
     static func canCustomizeColor(isPremium: Bool) -> Bool {
         !customColorRequiresPremium || isPremium

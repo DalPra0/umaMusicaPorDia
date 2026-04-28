@@ -4,7 +4,7 @@ import RevenueCatUI
 import UIKit
 
 @Observable
-class SubscriptionManager {
+class SubscriptionManager: NSObject {
     static let shared = SubscriptionManager()
     private let premiumEntitlementID = "Bentô Pro"
     private var foregroundObserver: NSObjectProtocol?
@@ -14,12 +14,15 @@ class SubscriptionManager {
     
     // Armazena as ofertas disponíveis no Dashboard (Mensal, Trimestral, Anual)
     var offerings: Offerings? = nil
+    var offeringsErrorMessage: String?
     
     // Estado para controlar a exibição do Customer Center
     var isShowingCustomerCenter: Bool = false
     
-    init() {
-        // Verifica o status logo ao iniciar
+    override init() {
+        super.init()
+        Purchases.shared.delegate = self
+
         checkSubscriptionStatus()
         fetchOfferings()
         
@@ -68,6 +71,22 @@ class SubscriptionManager {
         Purchases.shared.getOfferings { [weak self] (offerings, error) in
             DispatchQueue.main.async {
                 self?.offerings = offerings
+                self?.offeringsErrorMessage = error?.localizedDescription
+            }
+        }
+    }
+
+    @MainActor
+    func preparePaywall() async -> Bool {
+        await withCheckedContinuation { continuation in
+            Purchases.shared.getOfferings { [weak self] (offerings, error) in
+                DispatchQueue.main.async {
+                    self?.offerings = offerings
+                    self?.offeringsErrorMessage = error?.localizedDescription
+
+                    let packages = offerings?.current?.availablePackages ?? []
+                    continuation.resume(returning: !packages.isEmpty)
+                }
             }
         }
     }
@@ -91,5 +110,11 @@ class SubscriptionManager {
         if let foregroundObserver {
             NotificationCenter.default.removeObserver(foregroundObserver)
         }
+    }
+}
+
+extension SubscriptionManager: PurchasesDelegate {
+    func purchases(_ purchases: Purchases, receivedUpdated customerInfo: CustomerInfo) {
+        updatePremiumStatus(from: customerInfo)
     }
 }
