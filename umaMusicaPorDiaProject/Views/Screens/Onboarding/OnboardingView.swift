@@ -39,9 +39,10 @@ struct OnboardingView: View {
                 // ==========================================
                 if currentPage < 3 {
                     VStack {
-                        Text("loguinho")
-                            .font(.system(size: 32, weight: .bold))
-                            .foregroundColor(Color(hex: "6266F2"))
+                        Image("LogoBentoVerde")
+                            .resizable()
+                            .scaledToFit()
+                            .frame(width: 150, height: 50)
                             .padding(.top, geo.safeAreaInsets.top > 0 ? 10 : 30)
                         Spacer()
                     }
@@ -105,24 +106,29 @@ struct OnboardingView: View {
                     SummaryView(hasCompletedOnboarding: $hasCompletedOnboarding, size: size, safeAreaTop: geo.safeAreaInsets.top)
                         .transition(.asymmetric(insertion: .move(edge: .trailing), removal: .move(edge: .trailing)))
                 }
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .overlay {
+            if currentPage < 3 {
+                Color.clear
+                    .contentShape(Rectangle())
+                    .gesture(
+                        DragGesture()
+                            .onEnded { value in
+                                let threshold: CGFloat = 40
+                                if value.translation.width < -threshold {
+                                    withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                        currentPage += 1
+                                    }
+                                } else if value.translation.width > threshold && currentPage > 0 {
+                                    withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                        currentPage -= 1
+                                    }
+                                }
+                            }
+                    )
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .contentShape(Rectangle())
-            .gesture(
-                DragGesture()
-                    .onEnded { value in
-                        let threshold: CGFloat = 40
-                        if value.translation.width < -threshold && currentPage < 3 {
-                            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                                currentPage += 1
-                            }
-                        } else if value.translation.width > threshold && currentPage > 0 {
-                            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
-                                currentPage -= 1
-                            }
-                        }
-                    }
-            )
+        }
         }
     }
 }
@@ -140,13 +146,11 @@ struct BasketItemView: View {
     
     var basketYOffset: CGFloat {
         if positionIndex == 0 { return 0 }
-        if positionIndex < 0 { return -screenSize.height * 0.48 }
-        return screenSize.height * 0.48
+        if positionIndex < 0 { return -screenSize.height * 1.1 }
+        return screenSize.height * 1.1
     }
-    
-    var basketScale: CGFloat {
-        positionIndex == 0 ? 1.0 : 0.45
-    }
+
+    var basketScale: CGFloat { 1.0 }
     
     var body: some View {
         ZStack {
@@ -177,7 +181,6 @@ struct BasketItemView: View {
             }
             .scaleEffect(basketScale)
             .offset(y: basketYOffset)
-            .opacity(positionIndex == 0 ? 1.0 : 0.3)
         }
         .zIndex(positionIndex == 0 ? 2 : 1)
         .animation(.spring(response: 0.6, dampingFraction: 0.8), value: currentPage)
@@ -191,35 +194,36 @@ struct SummaryView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            Text("loguinho")
-                .font(.system(size: 32, weight: .bold))
-                .foregroundColor(Color(hex: "6266F2"))
+            Image("LogoBentoVerde")
+                .resizable()
+                .scaledToFit()
+                .frame(width: 150, height: 50)
                 .padding(.top, safeAreaTop > 0 ? 10 : 30)
             
-            Spacer()
+            Spacer().frame(maxHeight: 20)
             
-            VStack(spacing: size.height * 0.02) {
+            VStack(spacing: 4) {
                 BasketSummaryItem(
                     image: "Basket1Green",
                     sticker: "StickerGreen",
-                    basketWidth: size.width * 0.65, // Aumentado no resumo também
-                    stickerWidth: size.width * 0.80
+                    basketWidth: size.width * 0.44,
+                    stickerWidth: size.width * 0.55
                 )
                 BasketSummaryItem(
                     image: "Basket1Yellow",
                     sticker: "StickerYellow",
-                    basketWidth: size.width * 0.65,
-                    stickerWidth: size.width * 0.80
+                    basketWidth: size.width * 0.44,
+                    stickerWidth: size.width * 0.55
                 )
                 BasketSummaryItem(
                     image: "Basket1Blue",
                     sticker: "StickerBlue",
-                    basketWidth: size.width * 0.65,
-                    stickerWidth: size.width * 0.80
+                    basketWidth: size.width * 0.44,
+                    stickerWidth: size.width * 0.55
                 )
             }
             
-            Spacer()
+            Spacer().frame(maxHeight: 20)
             
             Button(action: {
                 withAnimation { hasCompletedOnboarding = true }
@@ -243,14 +247,15 @@ struct BasketSummaryItem: View {
     let sticker: String
     let basketWidth: CGFloat
     let stickerWidth: CGFloat
-    
+
     var body: some View {
         ZStack {
             Image(image)
                 .resizable()
                 .aspectRatio(contentMode: .fit)
-                .frame(width: basketWidth)
-            
+                .frame(width: basketWidth, height: basketWidth)
+                .rotationEffect(.degrees(90))
+
             Image(sticker)
                 .resizable()
                 .aspectRatio(contentMode: .fit)

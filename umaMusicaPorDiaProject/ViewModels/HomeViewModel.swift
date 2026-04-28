@@ -13,6 +13,7 @@ final class HomeViewModel {
     var wordsOffset: CGFloat = 0
     var leverPull: CGFloat = 0
     var errorMessage: String?
+    var isDeletingAccount = false
     
     let placeholderWords = ["INFÂNCIA", "AMOR", "VIAGEM", "SONHO", "FESTA", "VERÃO", "AMIGOS", "NOSTALGIA"]
     private var wordPool: [String] = []
@@ -125,18 +126,18 @@ final class HomeViewModel {
             await HapticsManager.shared.playSpinDecelerationPattern(duration: totalDuration)
         }
 
-        withAnimation(.linear(duration: firstPhaseDuration)) {
-            wordsOffset = intermediateOffset
+        await withCheckedContinuation { continuation in
+            withAnimation(.linear(duration: firstPhaseDuration), completionCriteria: .logicallyComplete) {
+                self.wordsOffset = intermediateOffset
+            } completion: {
+                withAnimation(.easeOut(duration: secondPhaseDuration), completionCriteria: .logicallyComplete) {
+                    self.wordsOffset = finalOffset
+                } completion: {
+                    self.isSpinning = false
+                    continuation.resume()
+                }
+            }
         }
-
-        try? await Task.sleep(nanoseconds: UInt64(firstPhaseDuration * 1_000_000_000))
-
-        withAnimation(.easeOut(duration: secondPhaseDuration)) {
-            wordsOffset = finalOffset
-        }
-
-        try? await Task.sleep(nanoseconds: UInt64(secondPhaseDuration * 1_000_000_000))
-        isSpinning = false
     }
 
     private func buildSpinSequence(targetWord: String) -> [String] {
@@ -190,6 +191,21 @@ final class HomeViewModel {
             return true
         } catch {
             errorMessage = "Não foi possível sair da conta: \(error.localizedDescription)"
+            return false
+        }
+    }
+
+    @MainActor
+    func deleteAccount() async -> Bool {
+        guard !isDeletingAccount else { return false }
+        isDeletingAccount = true
+        defer { isDeletingAccount = false }
+
+        do {
+            try await authService.deleteCurrentAccount()
+            return true
+        } catch {
+            errorMessage = "Não foi possível excluir a conta: \(error.localizedDescription)"
             return false
         }
     }

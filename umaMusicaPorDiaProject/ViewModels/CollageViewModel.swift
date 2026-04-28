@@ -47,14 +47,26 @@ final class CollageViewModel {
     var canUndo: Bool { !undoStack.isEmpty }
     var canRedo: Bool { !redoStack.isEmpty }
     
+    private var wordId: UUID?
+
     init(
         collageService: CollageService = CollageService(),
         authService: AuthService = AuthService(),
         backgroundImageName: String? = nil,
-        basketConfiguration: BasketConfiguration? = nil
+        basketConfiguration: BasketConfiguration? = nil,
+        wordId: UUID? = nil
     ) {
         self.collageService = collageService
         self.authService = authService
+        self.wordId = wordId
+
+        if let restored = wordId.flatMap({ CollageStatePersistence.load(wordId: $0) }) {
+            items = restored.items
+            canvasColor = restored.canvasColor
+            canvasRatio = restored.canvasRatio
+            canvasBackgroundImage = restored.canvasBackgroundImage
+            return
+        }
 
         if let basketConfiguration {
             let basketImage: UIImage?
@@ -289,6 +301,9 @@ final class CollageViewModel {
         if undoStack.count > 20 { undoStack.removeFirst() }
         undoStack.append(currentState)
         redoStack.removeAll()
+        if let wordId {
+            CollageStatePersistence.save(viewModel: self, wordId: wordId)
+        }
     }
     
     func undo() {
@@ -320,6 +335,8 @@ final class CollageViewModel {
         do {
             try await collageService.saveCollage(userId: userId, wordId: wordId, imageData: compressedData, assets: assets)
             await NotificationManager.shared.markCollageAsCreatedToday()
+            CollageStatePersistence.clear(wordId: wordId)
+            self.wordId = nil
         } catch {
             self.errorMessage = error.localizedDescription
         }

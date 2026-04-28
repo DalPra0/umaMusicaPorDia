@@ -2,6 +2,7 @@ import SwiftUI
 
 struct CollageCanvasView: View {
     let viewModel: CollageViewModel
+    var showsWatermark: Bool = false
     
     var body: some View {
         ZStack {
@@ -45,22 +46,21 @@ struct CollageCanvasView: View {
                 )
             }
 
-            VStack(spacing: 4) {
-                Text("Feito com")
-                    .font(.system(size: 12, weight: .semibold))
-                    .foregroundStyle(Color.black.opacity(0.75))
+            if showsWatermark {
+                VStack(spacing: 2) {
+                    Text("feito com")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundStyle(.white)
+                        .shadow(color: .black.opacity(0.45), radius: 1, x: 0, y: 1)
 
-                Image("LogoBentoVerde")
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 84, height: 36)
+                    Image("LogoBentoVerde")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 84, height: 36)
+                }
+                .frame(maxHeight: .infinity, alignment: .bottom)
+                .padding(.bottom, 16)
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 8)
-            .background(Color.white.opacity(0.7))
-            .clipShape(RoundedRectangle(cornerRadius: 10))
-            .frame(maxHeight: .infinity, alignment: .bottom)
-            .padding(.bottom, 16)
         }
         .frame(width: 1080/3, height: 1920/3)
     }

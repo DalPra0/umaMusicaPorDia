@@ -8,6 +8,7 @@ struct SettingsSheet: View {
     @AppStorage("haptics.level") private var hapticsLevelRawValue = HapticsManager.Level.medium.rawValue
     @State private var showPaywall = false
     @State private var showCustomerCenter = false
+    @State private var showDeleteAccountConfirmation = false
     
     var body: some View {
         NavigationStack {
@@ -22,7 +23,18 @@ struct SettingsSheet: View {
                         .foregroundColor(.blue)
                     } else {
                         Button {
-                            showPaywall = true
+                            Task {
+                                let canOpenPaywall = await subscriptionManager.preparePaywall()
+                                if canOpenPaywall {
+                                    showPaywall = true
+                                } else {
+                                    viewModel.errorMessage = """
+                                    Não foi possível carregar os planos agora.
+                                    Verifique os produtos no App Store Connect e RevenueCat.
+                                    Detalhe: \(subscriptionManager.offeringsErrorMessage ?? "sem detalhes")
+                                    """
+                                }
+                            }
                         } label: {
                             HStack {
                                 Label("Seja Premium", systemImage: "star.fill")
@@ -57,6 +69,13 @@ struct SettingsSheet: View {
                     } label: {
                         Label("Sair da Conta", systemImage: "door.left.hand.open")
                     }
+
+                    Button(role: .destructive) {
+                        showDeleteAccountConfirmation = true
+                    } label: {
+                        Label("Excluir Conta", systemImage: "person.crop.circle.badge.xmark")
+                    }
+                    .disabled(viewModel.isDeletingAccount)
                 }
 
                 Section("Háptico") {
@@ -66,6 +85,15 @@ struct SettingsSheet: View {
                         }
                     }
                     .pickerStyle(.segmented)
+                }
+
+                Section("Sobre") {
+                    Link(destination: URL(string: "https://uma-musica-por-dia.vercel.app/terms")!) {
+                        Label("Termos de Uso (EULA)", systemImage: "doc.text")
+                    }
+                    Link(destination: URL(string: "https://uma-musica-por-dia.vercel.app/privacy")!) {
+                        Label("Política de Privacidade", systemImage: "lock.shield")
+                    }
                 }
             }
             .navigationTitle("Configurações")
@@ -89,6 +117,23 @@ struct SettingsSheet: View {
                 Button("OK", role: .cancel) {}
             } message: {
                 Text(viewModel.errorMessage ?? "")
+            }
+            .confirmationDialog(
+                "Excluir conta?",
+                isPresented: $showDeleteAccountConfirmation,
+                titleVisibility: .visible
+            ) {
+                Button("Excluir permanentemente", role: .destructive) {
+                    Task {
+                        let didDelete = await viewModel.deleteAccount()
+                        if didDelete {
+                            dismiss()
+                        }
+                    }
+                }
+                Button("Cancelar", role: .cancel) {}
+            } message: {
+                Text("Essa ação remove sua conta e os dados associados de forma permanente.")
             }
             .onAppear {
                 HapticsManager.shared.level = HapticsManager.Level(rawValue: hapticsLevelRawValue) ?? .medium

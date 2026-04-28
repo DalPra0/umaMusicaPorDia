@@ -8,6 +8,12 @@ struct CollageItemView: View {
     
     private let imageFrameWidth: CGFloat = 200
     
+    private var imageFrameHeight: CGFloat {
+        let originalWidth = item.image.size.width
+        guard originalWidth > 0 else { return imageFrameWidth }
+        return imageFrameWidth * (item.image.size.height / originalWidth)
+    }
+    
     private var activeStrokeWidth: CGFloat {
         if item.strokeWidth > 0 {
             return item.strokeWidth
@@ -59,7 +65,7 @@ struct CollageItemView: View {
                 Rectangle()
                     .strokeBorder(style: StrokeStyle(lineWidth: 2, dash: [5]))
                     .foregroundColor(.blue)
-                    .frame(width: imageFrameWidth)
+                    .frame(width: imageFrameWidth, height: imageFrameHeight)
             }
         }
         .rotationEffect(item.rotation)

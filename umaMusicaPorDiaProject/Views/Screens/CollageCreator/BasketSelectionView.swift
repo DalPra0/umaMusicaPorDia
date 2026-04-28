@@ -1,4 +1,5 @@
 import SwiftUI
+import RevenueCatUI
 
 struct BasketSelectionView: View {
     @State private var selectedThemeIndex: Int? = BasketTheme.defaultSelectionIndex
@@ -6,12 +7,16 @@ struct BasketSelectionView: View {
     @State private var selectedVariantByFolder: [String: String] = [:]
     @State private var navigateToNext = false
     @State private var showSettings = false
+    @State private var showPaywall = false
     @State private var settingsViewModel = HomeViewModel()
     let dailyWord: DailyWord
     @Environment(SubscriptionManager.self) private var subscriptionManager
     
     var body: some View {
         GeometryReader { screenGeometry in
+            let bottomGradientHeight = max(180, min(240, screenGeometry.size.height * 0.24))
+            let gradientStartLocation = max(0, min(1, 1 - (bottomGradientHeight / max(screenGeometry.size.height, 1))))
+
             ZStack(alignment: .bottom) {
                 Color(hex: "6759F1")
                     .ignoresSafeArea()
@@ -26,7 +31,7 @@ struct BasketSelectionView: View {
                 VStack(spacing: 0) {
                     header
                         .padding(.horizontal, 16)
-                        .padding(.top, 66)
+                        .padding(.top, 16)
                     
                     Text("Escolha seu modelo")
                         .font(.system(size: 34, weight: .bold))
@@ -34,14 +39,14 @@ struct BasketSelectionView: View {
                         .foregroundStyle(Color(hex: "81E862"))
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .padding(.horizontal, 38)
-                        .padding(.top, 31)
+                        .padding(.top, 8)
                     
                     GeometryReader { carouselGeo in
                         let itemHeight = min(359.0, carouselGeo.size.height * 0.88)
                         let verticalInset = max((carouselGeo.size.height - itemHeight) / 2, 0)
                         
                         ScrollView(.vertical, showsIndicators: false) {
-                            VStack(spacing: 0) {
+                            VStack(spacing: 24) {
                                 ForEach(Array(BasketTheme.allThemes.enumerated()), id: \.offset) { index, theme in
                                     modelCard(theme)
                                         .frame(maxWidth: .infinity)
@@ -53,19 +58,22 @@ struct BasketSelectionView: View {
                         }
                         .scrollTargetBehavior(.viewAligned)
                         .scrollPosition(id: $selectedThemeIndex)
-                        .safeAreaPadding(.vertical, verticalInset)
+                        .safeAreaPadding(.bottom, verticalInset)
                     }
-                    .padding(.top, 24)
+                    .padding(.top, 12)
                     .padding(.bottom, 120)
                 }
                 
                 LinearGradient(
-                    colors: [Color(hex: "81E862").opacity(0), Color(hex: "81E862")],
+                    stops: [
+                        .init(color: Color(hex: "81E862").opacity(0), location: gradientStartLocation),
+                        .init(color: Color(hex: "81E862"), location: 1)
+                    ],
                     startPoint: .top,
                     endPoint: .bottom
                 )
-                .frame(height: 450)
-                .allowsHitTesting(false)
+                .ignoresSafeArea()
+                    .allowsHitTesting(false)
                 
                 VStack(spacing: 12) {
                     colorCustomizationPanel
@@ -94,6 +102,9 @@ struct BasketSelectionView: View {
         }
         .sheet(isPresented: $showSettings) {
             SettingsSheet(viewModel: settingsViewModel)
+        }
+        .sheet(isPresented: $showPaywall, onDismiss: { subscriptionManager.checkSubscriptionStatus() }) {
+            PaywallView(displayCloseButton: true)
         }
     }
     
@@ -193,9 +204,16 @@ struct BasketSelectionView: View {
                         .labelsHidden()
                 }
             } else if selectedTheme.supportsCustomColorSelection {
-                Text("Personalização de cor disponível no premium.")
-                    .font(.system(size: 12, weight: .medium))
+                Button {
+                    showPaywall = true
+                } label: {
+                    HStack(spacing: 6) {
+                        Image(systemName: "lock.fill").font(.system(size: 12))
+                        Text("Personalizar cor — Premium")
+                            .font(.system(size: 12, weight: .medium))
+                    }
                     .foregroundStyle(Color.white.opacity(0.9))
+                }
             } else {
                 ScrollView(.horizontal, showsIndicators: false) {
                     HStack(spacing: 8) {

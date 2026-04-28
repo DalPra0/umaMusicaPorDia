@@ -1,6 +1,7 @@
 import SwiftUI
 import PhotosUI
 import UIKit
+import RevenueCatUI
 
 struct CollageCreatorView: View {
     private enum PhotosPickerMode {
@@ -18,7 +19,8 @@ struct CollageCreatorView: View {
         _viewModel = State(
             initialValue: CollageViewModel(
                 backgroundImageName: backgroundImageName,
-                basketConfiguration: basketConfiguration
+                basketConfiguration: basketConfiguration,
+                wordId: dailyWord?.id
             )
         )
     }
@@ -26,6 +28,7 @@ struct CollageCreatorView: View {
     @State private var showLayers = false
     @State private var showImageSource = false
     @State private var showPinterestAssets = false
+    @State private var showPinterestPaywall = false
     @State private var showPhotosPicker = false
     @State private var showCanvasSettings = false
     @State private var showStrokeSettings = false
@@ -36,6 +39,7 @@ struct CollageCreatorView: View {
     @State private var navigateToExport = false
 
     @Environment(\.dismiss) var dismiss
+    @Environment(SubscriptionManager.self) private var subscriptionManager
 
     var body: some View {
         ZStack {
@@ -80,7 +84,11 @@ struct CollageCreatorView: View {
                 },
                 onSelectPinterest: {
                     DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
-                        showPinterestAssets = true
+                        if subscriptionManager.isPremium {
+                            showPinterestAssets = true
+                        } else {
+                            showPinterestPaywall = true
+                        }
                     }
                 },
                 onSelectBackground: {
@@ -94,6 +102,9 @@ struct CollageCreatorView: View {
         .sheet(isPresented: $showPinterestAssets) {
             PinterestAssetsSheet(viewModel: viewModel)
                 .presentationDetents([.large])
+        }
+        .sheet(isPresented: $showPinterestPaywall, onDismiss: { subscriptionManager.checkSubscriptionStatus() }) {
+            PaywallView(displayCloseButton: true)
         }
         .sheet(isPresented: $showCanvasSettings) {
             CanvasSettingsSheet(viewModel: viewModel)
@@ -275,7 +286,7 @@ struct CollageCreatorView: View {
                 } else {
                     ToolbarButton(
                         title: "Fundo",
-                        icon: item.isBackgroundRemoved ? "wand.and.stars" : "photo.on.rectangle.angled",
+                        icon: "person.and.background.dotted",
                         isLoading: viewModel.isProcessing
                     ) {
                         Task {
@@ -285,13 +296,13 @@ struct CollageCreatorView: View {
                     .disabled(viewModel.isProcessing)
                 }
             } else {
-                ToolbarButton(title: "Fundo", icon: "photo.on.rectangle.angled") {
+                ToolbarButton(title: "Imagens", icon: "photo.on.rectangle.angled") {
                     showImageSource = true
                 }
             }
 
             if viewModel.selectedItemId != nil {
-                ToolbarButton(title: "Contorno", icon: "paintbrush.pointed") {
+                ToolbarButton(title: "Contorno", icon: "stroke.line.diagonal") {
                     viewModel.saveState()
                     showStrokeSettings = true
                 }
@@ -401,7 +412,7 @@ struct CollageCreatorView: View {
             return
         }
 
-        let renderer = ImageRenderer(content: CollageCanvasView(viewModel: viewModel))
+        let renderer = ImageRenderer(content: CollageCanvasView(viewModel: viewModel, showsWatermark: false))
         renderer.scale = 3.0
         
         if let uiImage = renderer.uiImage {

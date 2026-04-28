@@ -16,9 +16,10 @@ struct TimeMachineConsole: View {
                     .offset(y: -size.height * 0.15) // Sobe a imagem
                 
                 // 2. Área do Logo (Superior)
-                Text("LOGO")
-                    .font(.system(size: 48, weight: .black))
-                    .foregroundColor(.white)
+                Image("LogoBentoRoxo")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 132, height: 68)
                     .offset(y: size.height * 0.12) // Alinhado com a máquina subida
                 
                 // 3. Visor de Palavras (Centralizado no buraco da máquina)
